@@ -1,6 +1,7 @@
 package siga.toolsapi.gui;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,6 +15,7 @@ import siga.toolsapi.util.ColorTranslator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class GUI implements Listener {
 
@@ -68,6 +70,16 @@ public abstract class GUI implements Listener {
     public void setButton(int index, GuiButton button) {
         buttons.add(button);
         gui.setItem(index, button.getItem());
+    }
+
+    public void addButton(GuiButton button) {
+        for (int i = 0; i < this.gui.getSize(); i++) {
+            if (this.gui.getItem(i) == null || Objects.requireNonNull(this.gui.getItem(i)).getType() == Material.AIR) {
+                this.buttons.add(button);
+                this.gui.setItem(i, button.getItem());
+                return;
+            }
+        }
     }
 
 
