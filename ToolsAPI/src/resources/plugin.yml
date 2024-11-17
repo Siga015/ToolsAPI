@@ -1,3 +1,0 @@
-name: ToolsP
-version: '${project.version}'
-main: siga.toolsapi.ToolsP
