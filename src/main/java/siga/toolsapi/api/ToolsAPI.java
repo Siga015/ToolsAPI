@@ -7,6 +7,7 @@ import siga.toolsapi.gui.GUI;
 import siga.toolsapi.gui.GUIShape;
 import siga.toolsapi.item.ItemAction;
 import siga.toolsapi.item.ItemBase;
+import siga.toolsapi.item.ItemManager;
 import siga.toolsapi.util.ColorTranslator;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 public class ToolsAPI {
 
     private static ToolsAPI instance;
+    private final ItemManager itemManager;
 
     public ToolsAPI() {
         throw new IllegalArgumentException();
@@ -21,7 +23,7 @@ public class ToolsAPI {
 
 
     private ToolsAPI(Object dummy) {
-
+        this.itemManager = new ItemManager();
     }
 
     public static synchronized ToolsAPI getInstance() {
@@ -49,6 +51,13 @@ public class ToolsAPI {
     }
 
 
+    public void registerItem(ItemBase item, JavaPlugin plugin) {
+        itemManager.registerItem(item, plugin);
+    }
+
+    public ItemManager getItemManager() {
+        return itemManager;
+    }
 
     public ItemBase createCustomItem(JavaPlugin plugin, String itemID, Material material, String title) {
         ItemBase item = new ItemBase(plugin, itemID, material) {

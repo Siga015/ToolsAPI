@@ -14,6 +14,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.item.version.MetaHandler;
 import siga.toolsapi.item.version.MetaHandler_1_13;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ItemBase implements Listener {
@@ -25,6 +27,7 @@ public abstract class ItemBase implements Listener {
 
     private final List<String> lore;
 
+
     public ItemBase(JavaPlugin plugin, String itemID, Material material) {
         this.plugin = plugin;
         this.itemID = itemID;
@@ -33,7 +36,6 @@ public abstract class ItemBase implements Listener {
 
         this.handler = new MetaHandler_1_13(plugin);
     }
-
 
 
     public boolean isInteractable(ItemStack item) {
@@ -58,6 +60,8 @@ public abstract class ItemBase implements Listener {
             meta.addItemFlags(flag);
         }
 
+        assignAnnotatedElements(meta);
+
         handler.setPersistentData(meta, "ITEM_ID", itemID);
 
         customizeMeta(meta);
@@ -72,7 +76,6 @@ public abstract class ItemBase implements Listener {
     }
 
     public void setCustomData(ItemStack item, String key, String value) {
-        if (!isInteractable(item)) return;
         ItemMeta meta = item.getItemMeta();
         assert meta != null;
         handler.setPersistentData(meta, key, value);
@@ -80,7 +83,6 @@ public abstract class ItemBase implements Listener {
     }
 
     public String getCustomData(ItemStack item, String key) {
-        if (!isInteractable(item)) return null;
         ItemMeta meta = item.getItemMeta();
         assert meta != null;
         return handler.getPersistentData(meta, key);
@@ -93,9 +95,36 @@ public abstract class ItemBase implements Listener {
     protected abstract void customizeMeta(ItemMeta meta);
     protected abstract ItemAction onClick();
 
+
+    private void assignAnnotatedElements(ItemMeta meta) {
+        Class<?> currentClass = this.getClass();
+        while (currentClass != null) {
+            for (Field field : currentClass.getDeclaredFields()) {
+                if (field.isAnnotationPresent(ItemElement.class)) {
+                    try {
+                        field.setAccessible(true);
+                        Object value = field.get(this);
+                        if (value != null) {
+                            String key = field.getName();
+                            handler.setPersistentData(meta, key, value.toString());
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            currentClass = currentClass.getSuperclass();
+        }
+    }
+
+
     @EventHandler
     public void onClick(PlayerInteractEvent event) {
-        if (event.getItem() != null && isInteractable(event.getItem())) {
+        if (onClick() == null) return;
+
+        ItemStack item = event.getItem();
+
+        if (item != null && isInteractable(item)) {
             ClickType clickType = null;
 
             if (event.getAction().toString().contains("RIGHT")) {
@@ -106,7 +135,7 @@ public abstract class ItemBase implements Listener {
 
             if (clickType == null) return;
             ItemAction action = onClick();
-            action.execute(event.getPlayer(), clickType, event.getItem());
+            action.execute(event.getPlayer(), clickType, item);
         }
     }
 
