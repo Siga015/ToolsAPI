@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.item.version.MetaHandler;
+import siga.toolsapi.item.version.MetaHandler_1_12;
 import siga.toolsapi.item.version.MetaHandler_1_13;
 
 import java.lang.reflect.Field;
@@ -34,7 +35,7 @@ public abstract class ItemBase implements Listener {
         this.material = material;
         this.lore = setLore();
 
-        this.handler = new MetaHandler_1_13(plugin);
+        this.handler = isModernVersion() ? new MetaHandler_1_13(plugin) : new MetaHandler_1_12();
     }
 
 
