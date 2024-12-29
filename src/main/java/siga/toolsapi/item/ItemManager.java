@@ -3,9 +3,15 @@ package siga.toolsapi.item;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.util.ColorTranslator;
+import siga.toolsapi.util.CustomTag;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -61,6 +67,13 @@ public class ItemManager {
 
             player.spigot().sendMessage(itemComponent);
         }
+    }
+
+    public String getItemID(ItemStack item, JavaPlugin plugin) {
+        ItemMeta meta = item.getItemMeta();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+
+        return container.get(new NamespacedKey(plugin, CustomTag.ITEM_ID), PersistentDataType.STRING);
     }
 
 

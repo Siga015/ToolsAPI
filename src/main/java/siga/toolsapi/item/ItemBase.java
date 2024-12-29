@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.item.version.MetaHandler;
 import siga.toolsapi.item.version.MetaHandler_1_12;
 import siga.toolsapi.item.version.MetaHandler_1_13;
+import siga.toolsapi.util.CustomTag;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public abstract class ItemBase implements Listener {
         if (item == null || !item.hasItemMeta()) return false;
         ItemMeta meta = item.getItemMeta();
 
-        String storedID = handler.getPersistentData(meta, "ITEM_ID");
+        String storedID = handler.getPersistentData(meta, CustomTag.ITEM_ID);
 
         return itemID.equals(storedID);
     }
@@ -63,7 +64,7 @@ public abstract class ItemBase implements Listener {
 
         assignAnnotatedElements(meta);
 
-        handler.setPersistentData(meta, "ITEM_ID", itemID);
+        handler.setPersistentData(meta, CustomTag.ITEM_ID, itemID);
 
         customizeMeta(meta);
 
