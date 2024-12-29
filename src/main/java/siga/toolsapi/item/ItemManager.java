@@ -5,7 +5,6 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import siga.toolsapi.item.version.MetaHandler;
 import siga.toolsapi.util.ColorTranslator;
 
 import java.util.HashSet;
@@ -23,13 +22,13 @@ public class ItemManager {
 
 
 
-    public ItemBase getItemBase(Class<? extends ItemBase> clazz) {
+    public <T> T getItemBase(Class<? extends ItemBase> clazz) {
         for (ItemBase handler : itemRegistry) {
             if (handler.getClass().equals(clazz)) {
-                return handler;
+                return (T) handler;
             }
             else if (handler.getClass().getSuperclass().equals(clazz)) {
-                return handler;
+                return (T) handler;
             }
         }
 
