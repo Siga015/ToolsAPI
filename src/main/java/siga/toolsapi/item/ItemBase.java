@@ -140,6 +140,8 @@ public abstract class ItemBase implements Listener {
         }
     }
 
+
+    /*
     @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
         Item item = event.getItemDrop();
@@ -149,6 +151,8 @@ public abstract class ItemBase implements Listener {
             action.execute(event.getPlayer(), ClickType.DROP, item.getItemStack());
         }
     }
+
+     */
 
     private boolean isModernVersion() {
         try {

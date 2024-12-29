@@ -4,10 +4,8 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.item.version.MetaHandler;
-import siga.toolsapi.item.version.MetaHandler_1_13;
 import siga.toolsapi.util.ColorTranslator;
 
 import java.util.HashSet;
@@ -16,7 +14,6 @@ import java.util.Set;
 public class ItemManager {
 
     private final Set<ItemBase> itemRegistry = new HashSet<>();
-    private MetaHandler handler;
 
 
     public void registerItem(ItemBase item, JavaPlugin plugin) {
@@ -26,10 +23,16 @@ public class ItemManager {
 
 
 
-    public <T> T getItemBase(Class<? extends ItemBase> clazz) {
+    public ItemBase getItemBase(Class<? extends ItemBase> clazz) {
         for (ItemBase handler : itemRegistry) {
-            if (handler.getClass().equals(clazz)) return (T) handler;
+            if (handler.getClass().equals(clazz)) {
+                return handler;
+            }
+            else if (handler.getClass().getSuperclass().equals(clazz)) {
+                return handler;
+            }
         }
+
         return null;
     }
 
@@ -61,20 +64,6 @@ public class ItemManager {
         }
     }
 
-
-    public String getItemID(ItemStack item, JavaPlugin plugin) {
-        if (getHandler(plugin).getPersistentData(item.getItemMeta(), "ITEM_ID") == null) return null;
-
-        return getHandler(plugin).getPersistentData(item.getItemMeta(), "ITEM_ID");
-    }
-
-    private MetaHandler getHandler(JavaPlugin plugin) {
-        if (handler == null) {
-            handler = new MetaHandler_1_13(plugin);
-        }
-
-        return handler;
-    }
 
     public Set<ItemBase> getItemRegistry() {
         return itemRegistry;
