@@ -72,6 +72,11 @@ public class ToolsAPI {
             }
 
             @Override
+            protected String setCategory() {
+                return null;
+            }
+
+            @Override
             protected List<String> setLore() {
                 return null;
             }
