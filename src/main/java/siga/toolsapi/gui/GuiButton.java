@@ -33,6 +33,18 @@ public class GuiButton {
         this.item = item;
     }
 
+    public GuiButton(ItemStack item) {
+        if (item == null || item.getItemMeta() == null) {
+            throw new IllegalStateException("ItemStack cannot be null!");
+        }
+
+        this.title = item.getItemMeta().getDisplayName();
+        ItemMeta meta = item.getItemMeta();
+        meta.setLocalizedName("gui_button");
+        item.setItemMeta(meta);
+        this.item = item;
+    }
+
 
     public void setLore(String... lore) {
         ItemMeta meta = item.getItemMeta();

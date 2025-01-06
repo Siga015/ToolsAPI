@@ -7,6 +7,4 @@ public interface MetaHandler {
     void setPersistentData(ItemMeta meta, String key, String value);
 
     String getPersistentData(ItemMeta meta, String key);
-
-
 }

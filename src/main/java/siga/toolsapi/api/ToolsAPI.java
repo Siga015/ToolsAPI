@@ -11,6 +11,7 @@ import siga.toolsapi.item.ItemManager;
 import siga.toolsapi.util.ColorTranslator;
 
 import java.util.List;
+import java.util.Map;
 
 public class ToolsAPI {
 
@@ -78,6 +79,11 @@ public class ToolsAPI {
 
             @Override
             protected List<String> setLore() {
+                return null;
+            }
+
+            @Override
+            protected Map<String, Object> setPersistentData() {
                 return null;
             }
 

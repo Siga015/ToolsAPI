@@ -19,6 +19,7 @@ import siga.toolsapi.util.CustomTag;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
 public abstract class ItemBase implements Listener {
 
@@ -65,97 +66,33 @@ public abstract class ItemBase implements Listener {
         }
 
         PersistentDataContainer container = meta.getPersistentDataContainer();
-        initializeFields(container);
+        if (setPersistentData() != null) {
+            setPersistentData().forEach((key, o) -> {
+
+                NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
+                if (o instanceof Integer) {
+                    container.set(namespacedKey, PersistentDataType.INTEGER, (Integer) o);
+                } else if (o instanceof String) {
+                    container.set(namespacedKey, PersistentDataType.STRING, (String) o);
+                } else if (o instanceof Double) {
+                    container.set(namespacedKey, PersistentDataType.DOUBLE, (Double) o);
+                }
+            });
+        }
+
+
         handler.setPersistentData(meta, CustomTag.ITEM_ID, itemID);
 
         customizeMeta(meta);
 
         itemStack.setItemMeta(meta);
 
-        loadFromItemStack(itemStack);
         return itemStack;
     }
 
 
-    private void initializeFields(PersistentDataContainer container) {
-        for (Field field : getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(ItemVariable.class)) {
-                ItemVariable annotation = field.getAnnotation(ItemVariable.class);
-                String key = annotation.key().isEmpty() ? field.getName() : annotation.key();
-                NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
 
-                try {
-                    field.setAccessible(true);
-                    Object value = field.get(this);
-                    if (value instanceof Integer) {
-                        container.set(namespacedKey, PersistentDataType.INTEGER, (Integer) value);
-                    } else if (value instanceof String) {
-                        container.set(namespacedKey, PersistentDataType.STRING, (String) value);
-                    }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
 
-    public void loadFromItemStack(ItemStack itemStack) {
-        if (!isCustomItem(itemStack)) return;
-
-        ItemMeta meta = itemStack.getItemMeta();
-        assert meta != null;
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-
-        for (Field field : getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(ItemVariable.class)) {
-                ItemVariable annotation = field.getAnnotation(ItemVariable.class);
-                String key = annotation.key().isEmpty() ? field.getName() : annotation.key();
-                NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
-
-                try {
-                    field.setAccessible(true);
-                    if (container.has(namespacedKey, PersistentDataType.INTEGER)) {
-                        field.set(this, container.get(namespacedKey, PersistentDataType.INTEGER));
-                    } else if (container.has(namespacedKey, PersistentDataType.STRING)) {
-                        field.set(this, container.get(namespacedKey, PersistentDataType.STRING));
-                    }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
-
-    public void saveToItemStack(ItemStack itemStack) {
-        if (itemStack == null || !isCustomItem(itemStack)) return;
-
-        ItemMeta meta = itemStack.getItemMeta();
-        assert meta != null;
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-
-        for (Field field : getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(ItemVariable.class)) {
-                ItemVariable annotation = field.getAnnotation(ItemVariable.class);
-                String key = annotation.key().isEmpty() ? field.getName() : annotation.key();
-                NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
-
-                try {
-                    field.setAccessible(true);
-                    Object value = field.get(this);
-                    if (value instanceof Integer) {
-                        container.set(namespacedKey, PersistentDataType.INTEGER, (Integer) value);
-                    } else if (value instanceof String) {
-                        container.set(namespacedKey, PersistentDataType.STRING, (String) value);
-                    }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        itemStack.setItemMeta(meta);
-    }
 
 
     public String getItemID() {
@@ -167,6 +104,7 @@ public abstract class ItemBase implements Listener {
     protected abstract int setCustomModel();
     protected abstract String setCategory();
     protected abstract List<String> setLore();
+    protected abstract Map<String, Object> setPersistentData();
     protected abstract void customizeMeta(ItemMeta meta);
     protected abstract ItemAction onClick();
 
