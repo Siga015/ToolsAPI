@@ -81,6 +81,7 @@ public abstract class ItemBase implements Listener {
         }
 
 
+        handler.setPersistentData(meta, "UUID_ITEM", String.valueOf(System.currentTimeMillis()));
         handler.setPersistentData(meta, CustomTag.ITEM_ID, itemID);
 
         customizeMeta(meta);

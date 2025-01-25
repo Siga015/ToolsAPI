@@ -33,9 +33,6 @@ public class ItemManager {
             if (handler.getClass().equals(clazz)) {
                 return (T) handler;
             }
-            else if (handler.getClass().getSuperclass().equals(clazz)) {
-                return (T) handler;
-            }
         }
 
         return null;
@@ -44,6 +41,21 @@ public class ItemManager {
     public ItemBase getItemBase(String itemID) {
         for (ItemBase handler : itemRegistry) {
             if (handler.getItemID().equals(itemID)) return handler;
+        }
+        return null;
+    }
+
+    public ItemBase getItemBase(ItemStack item, JavaPlugin plugin) {
+        if (item == null || item.getItemMeta() == null) return null;
+
+        String itemID = getItemID(item, plugin);
+
+        if (itemID == null) return null;
+
+        for (ItemBase handler : itemRegistry) {
+            if (handler.getItemID().equals(itemID)) {
+                return handler;
+            }
         }
         return null;
     }
@@ -69,7 +81,7 @@ public class ItemManager {
         }
     }
 
-    public String getItemID(ItemStack item, JavaPlugin plugin) {
+    private String getItemID(ItemStack item, JavaPlugin plugin) {
         ItemMeta meta = item.getItemMeta();
         PersistentDataContainer container = meta.getPersistentDataContainer();
 
