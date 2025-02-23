@@ -27,14 +27,16 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     private final String usage;
     private final boolean allowConsole;
 
-    private List<SubCommand> subCommands;
+    private final static String PERM_PREFIX = "armoryWeapon";
+
+    private List<SubCommand> subCommands = new ArrayList<>();
 
     public CommandBase(String name, String permission, String usage, boolean allowConsole) {
         this.name = name;
-        this.permission = "armoryWeapon." + permission;
+        this.permission = PERM_PREFIX + permission;
         this.usage = ColorTranslator.translate("&cMisspelled! Correct usage: " + usage);
         this.allowConsole = allowConsole;
-        this.subCommands = subCommandsList();
+        this.subCommands = subCommandsList(subCommands);
 
         registerSubCommands();
     }
@@ -44,7 +46,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
      * @param player the player executing the command
      * @return a Runnable that defines the action to be taken
      */
-    protected abstract Runnable onExecute(Player player);
+    protected abstract Runnable onExecute(Player player, Integer number);
 
 
     /**
@@ -52,7 +54,11 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
      *
      * @return a provided subcommands of the main command
      */
-    protected abstract List<SubCommand> subCommandsList();
+    protected abstract List<SubCommand> subCommandsList(List<SubCommand> subCommands);
+
+
+    protected abstract boolean isNumeric();
+    protected abstract boolean isPlayerAffected();
 
 
     /**
@@ -79,16 +85,23 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
             return false;
         }
 
+        command.setUsage(usage);
         if (!label.equalsIgnoreCase(name)) return false;
 
-        command.setUsage(usage);
+        if (isNumeric()) {
+            if (args.length == 0 || !isNumericArgument(args[0])) {
+                sender.sendMessage(ColorTranslator.translate("&cYou must provide a numeric value."));
+                return true;
+            }
+        }
 
-        if (args.length == 0) {
-            Runnable action = onExecute((Player) sender);
+
+        if (args.length == 1) {
+            Runnable action = onExecute((Player) sender, isNumeric() ? Integer.parseInt(args[0]) : null);
+
             if (action != null) action.run();
             return true;
         }
-
 
         return handleSubCommand((Player) sender, args);
     }
@@ -102,10 +115,12 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     private boolean handleSubCommand(Player player, String[] args) {
         if (args.length == 0) return false;
 
-        // Start with the top-level subcommands
-        SubCommand currentCommand = findSubCommand(subCommands, args[0]);
+        int startIndex = isNumeric() ? 1 : 0;
+        if (args.length <= startIndex) return false;
 
-        for (int i = 1; i < args.length && currentCommand != null; i++) {
+        SubCommand currentCommand = findSubCommand(subCommands, args[startIndex]);
+
+        for (int i = startIndex + 1; i < args.length && currentCommand != null; i++) {
             SubCommand nextCommand = findSubCommand(currentCommand.getSubCommands(), args[i]);
 
             if (nextCommand == null) {
@@ -128,6 +143,10 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         return false;
     }
 
+    private boolean isNumericArgument(String str) {
+        return str.matches("-?\\d+");
+    }
+
     /**
      * Helper method to find a subcommand by name in a collection of subcommands.
      * @param subCommands Collection of subcommands to search.
@@ -143,16 +162,21 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         return null;
     }
 
-    /**
-     * Handles tab completion for commands and subcommands.
-     */
+
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (subCommands.isEmpty() || args.length == 0) return null;
 
-        return getTabCompletions(subCommands, args, 0);
-    }
+        if (isNumeric() && args.length == 1) {
+            return List.of("<number>");
+        }
 
+        int startIndex = isNumeric() ? 1 : 0;
+        if (args.length <= startIndex) return null;
+
+        return getTabCompletions(subCommands, args, startIndex);
+    }
 
     /**
      * Recursive method to get tab completions for subcommands at the specified depth.
@@ -187,6 +211,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
      */
     private void registerSubCommands() {
 
+
         for (Method method : getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(Subcommand.class)) {
                 Subcommand subcommand = method.getAnnotation(Subcommand.class);
@@ -201,7 +226,8 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
                 addSubCommand(subCommand);
             }
         }
-        subCommands = subCommandsList();
+        subCommands = subCommandsList(subCommands);
+
     }
 
     public String getName() {

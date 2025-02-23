@@ -8,11 +8,15 @@ public class SubCommand {
     private final CommandAction action;
     private final String name;
     private final List<SubCommand> subCommands;
+    private final boolean numeric;
+    private final boolean playerAffected;
 
-    private SubCommand(String name, List<SubCommand> subCommands, CommandAction action) {
+    private SubCommand(String name, List<SubCommand> subCommands, CommandAction action, boolean numeric, boolean playerAffected) {
         this.name = name;
         this.action = action;
         this.subCommands = subCommands;
+        this.numeric = numeric;
+        this.playerAffected = playerAffected;
     }
 
     public CommandAction getAction() {
@@ -30,6 +34,8 @@ public class SubCommand {
     public static class Builder {
 
         private final String name;
+        private boolean numeric = false;
+        private boolean playerAff = false;
         private final List<SubCommand> subCommands = new ArrayList<>();
 
         public Builder(String name) {
@@ -41,9 +47,27 @@ public class SubCommand {
             return this;
         }
 
-        public SubCommand onUse(CommandAction action) {
-            return new SubCommand(name, subCommands, action);
+        public Builder setNumeric() {
+            numeric = true;
+            return this;
         }
+
+        public Builder setPlayerAffected() {
+            playerAff = true;
+            return this;
+        }
+
+        public SubCommand onUse(CommandAction action) {
+            return new SubCommand(name, subCommands, action, numeric, playerAff);
+        }
+    }
+
+    public boolean isNumeric() {
+        return numeric;
+    }
+
+    public boolean isPlayerAffected() {
+        return playerAffected;
     }
 
     public void addSubCommand(SubCommand command) {
