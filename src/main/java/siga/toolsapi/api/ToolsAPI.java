@@ -18,7 +18,7 @@ public class ToolsAPI {
 
     private static ToolsAPI instance;
     private final ItemManager itemManager;
-    private final ItemModifier itemModifier;
+    private ItemModifier itemModifier;
 
     public ToolsAPI() {
         throw new IllegalArgumentException();
@@ -27,7 +27,6 @@ public class ToolsAPI {
 
     private ToolsAPI(Object dummy) {
         this.itemManager = new ItemManager();
-        this.itemModifier = new ItemModifier();
     }
 
     public static synchronized ToolsAPI getInstance() {
@@ -63,7 +62,11 @@ public class ToolsAPI {
         return itemManager;
     }
 
-    public ItemModifier getItemModifier() {
+    public ItemModifier getItemModifier(JavaPlugin plugin) {
+        if (itemModifier == null) {
+            itemModifier = new ItemModifier(plugin);
+        }
+
         return itemModifier;
     }
 

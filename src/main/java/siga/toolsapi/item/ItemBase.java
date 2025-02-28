@@ -20,6 +20,7 @@ import siga.toolsapi.util.CustomTag;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class ItemBase implements Listener {
 
@@ -81,7 +82,7 @@ public abstract class ItemBase implements Listener {
         }
 
 
-        handler.setPersistentData(meta, "UUID_ITEM", String.valueOf(System.currentTimeMillis()));
+        handler.setPersistentData(meta, CustomTag.ITEM_UUID, UUID.randomUUID().toString());
         handler.setPersistentData(meta, CustomTag.ITEM_ID, itemID);
 
         customizeMeta(meta);
@@ -93,11 +94,12 @@ public abstract class ItemBase implements Listener {
 
 
 
-
-
-
     public String getItemID() {
         return itemID;
+    }
+
+    public String getItemUUID(ItemStack item) {
+        return handler.getPersistentData(item.getItemMeta(), CustomTag.ITEM_UUID);
     }
 
 
