@@ -83,6 +83,8 @@ public class ItemManager {
 
     private String getItemID(ItemStack item, JavaPlugin plugin) {
         ItemMeta meta = item.getItemMeta();
+        if (meta == null) return null;
+
         PersistentDataContainer container = meta.getPersistentDataContainer();
 
         return container.get(new NamespacedKey(plugin, CustomTag.ITEM_ID), PersistentDataType.STRING);
