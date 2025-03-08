@@ -5,6 +5,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -24,6 +25,11 @@ public class ItemManager {
     public void registerItem(ItemBase item, JavaPlugin plugin) {
         plugin.getServer().getPluginManager().registerEvents(item, plugin);
         itemRegistry.add(item);
+    }
+
+    public void unregisterItem(ItemBase item) {
+        HandlerList.unregisterAll(item);
+        itemRegistry.remove(item);
     }
 
 
