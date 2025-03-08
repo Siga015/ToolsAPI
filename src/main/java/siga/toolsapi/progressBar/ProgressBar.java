@@ -116,7 +116,7 @@ public class ProgressBar {
         public void run() {
             if (!player.isOnline() || player.isDead() || stopCondition != null && stopCondition.shouldStop()) {
                 stop();
-                if (breakAction != null) breakAction.execute(player);
+
                 return;
             }
 
@@ -147,6 +147,7 @@ public class ProgressBar {
         public void stop() {
             cancel();
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(""));
+            if (breakAction != null) breakAction.execute(player);
             playerTimer.remove(player);
         }
     }
