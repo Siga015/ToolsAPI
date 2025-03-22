@@ -5,7 +5,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import siga.toolsapi.ToolsP;
+import siga.toolsapi.api.ToolsAPI;
 import siga.toolsapi.util.ColorTranslator;
+import siga.toolsapi.util.Timing;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,18 +31,19 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     private final String usage;
     private final boolean allowConsole;
 
-    private final static String PERM_PREFIX = "armoryWeapon";
-
     private List<SubCommand> subCommands = new ArrayList<>();
 
-    public CommandBase(String name, String permission, String usage, boolean allowConsole) {
+    public CommandBase(JavaPlugin plugin, String name, String permission, String usage, boolean allowConsole) {
         this.name = name;
-        this.permission = PERM_PREFIX + permission;
+        this.permission = permission;
         this.usage = ColorTranslator.translate("&cMisspelled! Correct usage: " + usage);
         this.allowConsole = allowConsole;
-        this.subCommands = subCommandsList(subCommands);
 
-        registerSubCommands();
+        Timing.callDelay(plugin, 5, () -> {
+            this.subCommands = subCommandsList(subCommands);
+
+            registerSubCommands();
+        });
     }
 
     protected abstract Runnable onExecute(Player player, Integer number);

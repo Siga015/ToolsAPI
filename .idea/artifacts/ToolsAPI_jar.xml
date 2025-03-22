@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="ToolsAPI:jar">
-    <output-path>$PROJECT_DIR$/../../resources/APIs</output-path>
+    <output-path>$PROJECT_DIR$/../../RESOURCES/BREACH_REBORN</output-path>
     <root id="archive" name="ToolsAPI.jar">
       <element id="module-output" name="ToolsAPI" />
     </root>
