@@ -1,55 +1,44 @@
 package siga.toolsapi.command;
 
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
+import siga.toolsapi.command.configuration.CommandConfiguration;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Objects;
 
-public class CommandRegistry {
+/**
+ * Registers commands and tab completer
+ */
+public final class CommandRegistry {
 
     private final JavaPlugin plugin;
-    private final Collection<CommandBase> commandRegistry;
+    private final CommandConfiguration commandConfiguration;
 
-    public CommandRegistry(JavaPlugin plugin) {
+    public CommandRegistry(JavaPlugin plugin, CommandConfiguration commandConfiguration) {
         this.plugin = plugin;
-        this.commandRegistry = new ArrayList<>();
-    }
-
-    public void register(CommandBase command) {
-        PluginCommand pCommand = plugin.getCommand(command.getName());
-
-        pCommand.setExecutor(command);
-        pCommand.setTabCompleter(command);
-
-        commandRegistry.add(command);
-    }
-
-    public void register(CommandExecutor command, String commandName) {
-        PluginCommand pCommand = plugin.getCommand(commandName);
-        pCommand.setExecutor(command);
-    }
-
-    public void registerTabCompleter(TabCompleter command, String commandName) {
-        PluginCommand pCommand = plugin.getCommand(commandName);
-        pCommand.setTabCompleter(command);
-    }
-
-    public void unregisterAll() {
-
-        for (CommandBase command : commandRegistry) {
-            PluginCommand pCommand = plugin.getCommand(command.getName());
-            pCommand.setExecutor(null);
-            pCommand.setTabCompleter(null);
-
-            commandRegistry.remove(command);
-        }
+        this.commandConfiguration = commandConfiguration;
     }
 
 
-    public Collection<CommandBase> getCommandRegistry() {
-        return commandRegistry;
+    /**
+     * Registers command
+     *
+     * @param command command to register
+     */
+    public void registerCommand(ParentCommand command) {
+        command.setCommandConfiguration(commandConfiguration);
+
+        Objects.requireNonNull(plugin.getCommand(command.getName())).setExecutor(command);
+    }
+
+    /**
+     * Registers command with tab completer
+     *
+     * @param command command to register
+     */
+    public void registerCommandWithTabCompleter(ParentCommand command) {
+        if (command.getTabCompleter() == null) return;
+
+        registerCommand(command);
+        Objects.requireNonNull(plugin.getCommand(command.getName())).setTabCompleter(command.getTabCompleter());
     }
 }
