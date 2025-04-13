@@ -24,8 +24,10 @@ import java.util.List;
  *
  * @author Siga
  */
+@Deprecated
 public abstract class CommandBase implements CommandExecutor, TabCompleter {
 
+    /*
     private final String name;
     private final String permission;
     private final String usage;
@@ -189,4 +191,6 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     public @interface Subcommand {
         String value();
     }
+
+     */
 }
