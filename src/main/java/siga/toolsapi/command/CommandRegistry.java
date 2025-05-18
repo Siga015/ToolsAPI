@@ -27,7 +27,7 @@ public final class CommandRegistry {
     public void registerCommand(ParentCommand command) {
         command.setCommandConfiguration(commandConfiguration);
 
-        Objects.requireNonNull(plugin.getCommand(command.getName())).setExecutor(command);
+        plugin.getCommand(command.getName()).setExecutor(command);
     }
 
     /**

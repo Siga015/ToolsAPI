@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.gui.GUI;
+import siga.toolsapi.gui.GUIManager;
 import siga.toolsapi.gui.GUIShape;
 import siga.toolsapi.item.ItemAction;
 import siga.toolsapi.item.ItemBase;
@@ -18,6 +19,7 @@ public class ToolsAPI {
 
     private static ToolsAPI instance;
     private final ItemManager itemManager;
+    private final GUIManager guiManager;
     private ItemModifier itemModifier;
 
     public ToolsAPI() {
@@ -27,6 +29,7 @@ public class ToolsAPI {
 
     private ToolsAPI(Object dummy) {
         this.itemManager = new ItemManager();
+        this.guiManager = new GUIManager();
     }
 
     public static synchronized ToolsAPI getInstance() {
@@ -61,6 +64,11 @@ public class ToolsAPI {
     public ItemManager getItemManager() {
         return itemManager;
     }
+
+    public GUIManager getGUIManager() {
+        return guiManager;
+    }
+
 
     public ItemModifier getItemModifier(JavaPlugin plugin) {
         if (itemModifier == null) {

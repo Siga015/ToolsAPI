@@ -75,6 +75,7 @@ public abstract class GUI implements Listener {
     }
 
     public void applyShape(GUIShape shape) {
+
         int slot = 0;
 
         for (String row : shape.getRows()) {
