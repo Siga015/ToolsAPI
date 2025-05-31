@@ -21,7 +21,7 @@ public abstract class GUI implements Listener {
 
     private final JavaPlugin plugin;
     private final GUIShape shape;
-    private final Inventory gui;
+    private Inventory gui;
     private final List<GuiButton> buttons = new ArrayList<>();
 
     private static boolean registered = false;
@@ -77,6 +77,8 @@ public abstract class GUI implements Listener {
     public void applyShape(GUIShape shape) {
 
         int slot = 0;
+
+        this.gui = Bukkit.createInventory(null, shape.getRowsLength() * 9, ColorTranslator.translate(setName()));
 
         for (String row : shape.getRows()) {
             for (int i = slot; i < row.length() + slot; i++) {
