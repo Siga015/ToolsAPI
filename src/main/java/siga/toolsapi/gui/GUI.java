@@ -75,11 +75,10 @@ public abstract class GUI implements Listener {
     }
 
     public void applyShape(GUIShape shape) {
+        this.gui = Bukkit.createInventory(null, shape.getRowsLength() * 9, ColorTranslator.translate(setName()));
+        this.buttons.clear();
 
         int slot = 0;
-
-        this.gui = Bukkit.createInventory(null, shape.getRowsLength() * 9, ColorTranslator.translate(setName()));
-
         for (String row : shape.getRows()) {
             for (int i = slot; i < row.length() + slot; i++) {
                 char c = row.charAt(i - slot);

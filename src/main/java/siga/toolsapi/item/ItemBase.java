@@ -1,6 +1,7 @@
 package siga.toolsapi.item;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
@@ -9,6 +10,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,6 +20,7 @@ import siga.toolsapi.item.version.MetaHandler_1_13;
 import siga.toolsapi.util.CustomTag;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,7 +40,10 @@ public abstract class ItemBase implements Listener {
         this.plugin = plugin;
         this.itemID = itemID;
         this.material = material;
-        this.lore = setLore();
+        List<String> lore = setLore();
+        lore.forEach(ColorTranslator::translate);
+        this.lore = lore;
+
         this.category = setCategory();
 
         this.handler = isModernVersion() ? new MetaHandler_1_13(plugin) : new MetaHandler_1_12();
@@ -59,7 +65,14 @@ public abstract class ItemBase implements Listener {
 
         assert meta != null;
         meta.setDisplayName(ColorTranslator.translate(setName()));
-        if (isModernVersion() && setCustomModel() > 0) meta.setCustomModelData(setCustomModel());
+        if (isModernVersion() && setCustomModel() != null) {
+            CustomModelDataComponent modelDataComp = meta.getCustomModelDataComponent();
+            List<String> strings = new ArrayList<>();
+            strings.add(setCustomModel());
+            modelDataComp.setStrings(strings);
+
+            meta.setCustomModelDataComponent(modelDataComp);
+        }
         meta.setLore(lore);
 
         for (ItemFlag flag : ItemFlag.values()) {
@@ -104,7 +117,7 @@ public abstract class ItemBase implements Listener {
 
 
     protected abstract String setName();
-    protected abstract int setCustomModel();
+    protected abstract String setCustomModel();
     protected abstract String setCategory();
     protected abstract List<String> setLore();
     protected abstract Map<String, Object> setPersistentData();

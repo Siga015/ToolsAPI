@@ -1,6 +1,6 @@
 package siga.toolsapi.gui;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
@@ -15,6 +15,7 @@ public class GUIShape {
     private final List<String> rows;
 
     public int rowsLength;
+
 
     public GUIShape(String... rows) {
         Validate.notNull(rows, "Must provide a shape");

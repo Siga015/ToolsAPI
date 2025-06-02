@@ -86,8 +86,8 @@ public class ToolsAPI {
             }
 
             @Override
-            protected int setCustomModel() {
-                return -1;
+            protected String setCustomModel() {
+                return null;
             }
 
             @Override
