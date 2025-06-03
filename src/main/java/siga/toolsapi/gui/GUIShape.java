@@ -52,10 +52,13 @@ public class GUIShape {
         items.put(key, item);
     }
 
-    public void setButton(char key, GuiButton button) {
+
+
+    public GUIShape setButton(char key, GuiButton button) {
         Validate.isTrue(buttons.containsKey(key), "Symbol does not appear in the shape: ", key);
 
         buttons.put(key, button);
+        return this;
     }
 
 
