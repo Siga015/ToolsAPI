@@ -23,7 +23,6 @@ public class GuiButton {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ColorTranslator.translate(title));
-        meta.setLocalizedName("gui_button");
 
         for (ItemFlag flag : ItemFlag.values()) {
             meta.addItemFlags(flag);
@@ -40,7 +39,6 @@ public class GuiButton {
 
         this.title = item.getItemMeta().getDisplayName();
         ItemMeta meta = item.getItemMeta();
-        meta.setLocalizedName("gui_button");
         item.setItemMeta(meta);
         this.item = item;
     }
