@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class GUIShape {
 
+    private static Map<Character, ItemStack> globalItems = new HashMap<>();
     private Map<Character, ItemStack> items = new HashMap<>();
     private Map<Character, GuiButton> buttons = new HashMap<>();
     private final List<String> rows;
@@ -19,6 +20,7 @@ public class GUIShape {
 
     public GUIShape(String... rows) {
         Validate.notNull(rows, "Must provide a shape");
+
         Validate.isTrue(rows.length > 0 && rows.length < 10, "GUI menu should have from 1 to 9 rows, not ", rows.length);
 
         int lastLen = -1;
@@ -34,6 +36,13 @@ public class GUIShape {
         HashMap<Character, GuiButton> newButtons = new HashMap<>();
         for (String row : rows) {
             for (Character c : row.toCharArray()) {
+
+                if (!globalItems.isEmpty()) {
+                    if (globalItems.containsKey(c)) {
+                        newItems.put(c, globalItems.get(c));
+                    }
+                }
+
                 newItems.put(c, items.get(c));
                 newButtons.put(c, buttons.get(c));
             }
@@ -59,6 +68,10 @@ public class GUIShape {
 
         buttons.put(key, button);
         return this;
+    }
+
+    public static void setGlobalItem(char key, ItemStack item) {
+        globalItems.put(key, item);
     }
 
 
