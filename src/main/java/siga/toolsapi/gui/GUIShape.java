@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class GUIShape {
 
+    private static Map<Character, ItemStack> globalItems = new HashMap<>();
     private Map<Character, ItemStack> items = new HashMap<>();
     private Map<Character, GuiButton> buttons = new HashMap<>();
     private final List<String> rows;
@@ -34,6 +35,13 @@ public class GUIShape {
         HashMap<Character, GuiButton> newButtons = new HashMap<>();
         for (String row : rows) {
             for (Character c : row.toCharArray()) {
+
+                if (!globalItems.isEmpty()) {
+                    if (globalItems.containsKey(c)) {
+                        newItems.put(c, globalItems.get(c));
+                    }
+                }
+
                 newItems.put(c, items.get(c));
                 newButtons.put(c, buttons.get(c));
             }
@@ -56,6 +64,10 @@ public class GUIShape {
         Validate.isTrue(buttons.containsKey(key), "Symbol does not appear in the shape: ", key);
 
         buttons.put(key, button);
+    }
+
+    public static void setGlobalItem(char key, ItemStack item) {
+        globalItems.put(key, item);
     }
 
 
