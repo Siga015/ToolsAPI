@@ -20,6 +20,7 @@ public class GUIShape {
 
     public GUIShape(String... rows) {
         Validate.notNull(rows, "Must provide a shape");
+
         Validate.isTrue(rows.length > 0 && rows.length < 10, "GUI menu should have from 1 to 9 rows, not ", rows.length);
 
         int lastLen = -1;
