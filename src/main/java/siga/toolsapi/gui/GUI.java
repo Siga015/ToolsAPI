@@ -33,6 +33,7 @@ public abstract class GUI implements Listener {
 
         applyShape(setShape());
         register();
+
     }
 
 

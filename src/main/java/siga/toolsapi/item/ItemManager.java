@@ -15,11 +15,12 @@ import siga.toolsapi.util.ColorTranslator;
 import siga.toolsapi.util.CustomTag;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ItemManager {
 
-    private final Set<ItemBase> itemRegistry = new HashSet<>();
+    private final Set<ItemBase> itemRegistry = new LinkedHashSet<>();
 
 
     public void registerItem(ItemBase item, JavaPlugin plugin) {
