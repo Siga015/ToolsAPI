@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ToolsAPI:jar">
+    <output-path>$PROJECT_DIR$/../../RESOURCES/APIs</output-path>
+    <root id="archive" name="ToolsAPI.jar">
+      <element id="module-output" name="ToolsAPI" />
+    </root>
+  </artifact>
+</component>
