@@ -41,7 +41,7 @@ public abstract class ItemBase implements Listener {
         this.itemID = itemID;
         this.material = material;
         List<String> lore = setLore();
-        lore.forEach(ColorTranslator::translate);
+        if (lore != null) lore.forEach(ColorTranslator::translate);
         this.lore = lore;
         this.category = setCategory();
 

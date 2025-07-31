@@ -119,11 +119,7 @@ public abstract class GUI implements Listener {
 
 
     private boolean handleButton(ItemStack item, Player player) {
-        GuiButton button = buttons.stream()
-                .filter(button1 -> areItemsSimilar(button1.getItem(), item))
-                .findAny()
-                .orElse(null);
-
+        GuiButton button = getButtonByItem(item);
 
         if (button != null) {
             if (button.getCloseInventory()) player.closeInventory();
@@ -132,6 +128,27 @@ public abstract class GUI implements Listener {
         }
         return false;
     }
+
+
+    private boolean handleShiftButton(ItemStack item, Player player) {
+        GuiButton button = getButtonByItem(item);
+        if (button != null) {
+            if (button.getShiftAction() != null) {
+                button.getShiftAction().execute(player);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private GuiButton getButtonByItem(ItemStack item) {
+        return buttons.stream()
+                .filter(button -> areItemsSimilar(button.getItem(), item))
+                .findAny()
+                .orElse(null);
+    }
+
+
 
 
     private void register() {
@@ -156,13 +173,20 @@ public abstract class GUI implements Listener {
     public void onClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
 
+
         Player player = (Player) event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
         PlayerData data = PlayerData.getPlayer(player);
 
         if (data != null && data.getCurrentGUI() != null && item != null) {
             GUI gui = data.getCurrentGUI();
-            if (gui.handleButton(item, player)) event.setCancelled(true);
+            if (event.isShiftClick()) {
+                if (gui.handleShiftButton(item, player)) {
+                    event.setCancelled(true);
+                    player.updateInventory();
+                }
+            }
+            else if (gui.handleButton(item, player)) event.setCancelled(true);
         }
     }
 

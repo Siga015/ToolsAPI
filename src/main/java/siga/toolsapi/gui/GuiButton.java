@@ -18,6 +18,7 @@ public class GuiButton {
     private final ItemStack item;
     private final String title;
     private ClickAction action;
+    private ClickAction shiftAction;
     private boolean closeInventory;
     private LoreProvider loreProvider;
 
@@ -76,6 +77,13 @@ public class GuiButton {
         item.setItemMeta(meta);
     }
 
+
+    public boolean isEnchantVisible() {
+        ItemMeta meta = item.getItemMeta();
+
+        return meta.hasEnchant(Enchantment.LUCK_OF_THE_SEA);
+    }
+
     public void setLore(LoreProvider loreProvider) {
         this.loreProvider = loreProvider;
     }
@@ -88,6 +96,10 @@ public class GuiButton {
         return action;
     }
 
+    public ClickAction getShiftAction() {
+        return shiftAction;
+    }
+
     public boolean getCloseInventory() {
         return closeInventory;
     }
@@ -98,6 +110,11 @@ public class GuiButton {
 
     public GuiButton onClick(ClickAction action) {
         this.action = action;
+        return this;
+    }
+
+    public GuiButton onShiftClick(ClickAction shiftAction) {
+        this.shiftAction = shiftAction;
         return this;
     }
 
@@ -118,6 +135,11 @@ public class GuiButton {
     public void setAction(ClickAction action) {
         this.action = action;
     }
+
+    public void setShiftAction(ClickAction shiftAction) {
+        this.shiftAction = shiftAction;
+    }
+
 
     public void updateLore(Player player) {
         if (loreProvider == null) return;
