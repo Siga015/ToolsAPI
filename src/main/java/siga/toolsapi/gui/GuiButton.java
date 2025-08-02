@@ -80,7 +80,6 @@ public class GuiButton {
 
     public boolean isEnchantVisible() {
         ItemMeta meta = item.getItemMeta();
-
         return meta.hasEnchant(Enchantment.LUCK_OF_THE_SEA);
     }
 
