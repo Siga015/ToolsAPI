@@ -42,6 +42,7 @@ public abstract class ItemBase implements Listener {
         this.lore = lore;
         this.category = setCategory();
 
+
         this.handler = isModernVersion() ? new MetaHandler_1_13(plugin) : new MetaHandler_1_12();
     }
 
