@@ -69,7 +69,7 @@ public class ToolsAPI {
         return guiManager;
     }
 
-
+    @Deprecated
     public ItemModifier getItemModifier(JavaPlugin plugin) {
         if (itemModifier == null) {
             itemModifier = new ItemModifier(plugin);
@@ -96,11 +96,6 @@ public class ToolsAPI {
 
             @Override
             protected List<String> setLore() {
-                return null;
-            }
-
-            @Override
-            protected Map<String, Object> setPersistentData() {
                 return null;
             }
 

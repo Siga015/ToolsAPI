@@ -1,9 +1,6 @@
 package siga.toolsapi.item;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -20,10 +17,8 @@ import siga.toolsapi.item.version.MetaHandler_1_13;
 import siga.toolsapi.util.CustomTag;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 public abstract class ItemBase implements Listener {
 
@@ -34,6 +29,8 @@ public abstract class ItemBase implements Listener {
 
     private final List<String> lore;
     private final String category;
+
+    private static final Set<Class<?>> registeredListeners = new HashSet<>();
 
 
     public ItemBase(JavaPlugin plugin, String itemID, Material material) {
@@ -47,6 +44,8 @@ public abstract class ItemBase implements Listener {
 
         this.handler = isModernVersion() ? new MetaHandler_1_13(plugin) : new MetaHandler_1_12();
     }
+
+
 
 
     public boolean isCustomItem(ItemStack item) {
@@ -78,26 +77,12 @@ public abstract class ItemBase implements Listener {
             meta.addItemFlags(flag);
         }
 
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        if (setPersistentData() != null) {
-            setPersistentData().forEach((key, o) -> {
-
-                NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
-                if (o instanceof Integer) {
-                    container.set(namespacedKey, PersistentDataType.INTEGER, (Integer) o);
-                } else if (o instanceof String) {
-                    container.set(namespacedKey, PersistentDataType.STRING, (String) o);
-                } else if (o instanceof Double) {
-                    container.set(namespacedKey, PersistentDataType.DOUBLE, (Double) o);
-                }
-            });
-        }
 
 
         handler.setPersistentData(meta, CustomTag.ITEM_UUID, UUID.randomUUID().toString());
         handler.setPersistentData(meta, CustomTag.ITEM_ID, itemID);
 
-        customizeMeta(meta);
+        finalizeMeta(meta);
 
         itemStack.setItemMeta(meta);
 
@@ -119,9 +104,15 @@ public abstract class ItemBase implements Listener {
     protected abstract String setCustomModel();
     protected abstract String setCategory();
     protected abstract List<String> setLore();
-    protected abstract Map<String, Object> setPersistentData();
     protected abstract void customizeMeta(ItemMeta meta);
     protected abstract ItemAction onClick();
+
+
+    protected void finalizeMeta(ItemMeta meta) {
+        customizeMeta(meta);
+        saveSerializableFields(meta, this);
+    }
+
 
 
     @EventHandler
@@ -144,6 +135,87 @@ public abstract class ItemBase implements Listener {
             action.execute(event.getPlayer(), clickType, item);
         }
     }
+
+    protected void saveSerializableFields(ItemMeta meta, Object instance) {
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        Class<?> current = instance.getClass();
+
+        while (current != null) {
+            for (Field field : current.getDeclaredFields()) {
+                if (!field.isAnnotationPresent(SerializableField.class)) continue;
+
+                field.setAccessible(true);
+                SerializableField annotation = field.getAnnotation(SerializableField.class);
+                String key = annotation.key().isEmpty() ? field.getName() : annotation.key();
+                NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
+
+                try {
+                    Object value = field.get(instance);
+                    if (value == null) continue;
+
+                    if (value instanceof Integer) {
+                        container.set(namespacedKey, PersistentDataType.INTEGER, (Integer) value);
+                    } else if (value instanceof String) {
+                        container.set(namespacedKey, PersistentDataType.STRING, (String) value);
+                    } else if (value instanceof Double) {
+                        container.set(namespacedKey, PersistentDataType.DOUBLE, (Double) value);
+                    } else if (value instanceof Enum<?>) {
+                        container.set(namespacedKey, PersistentDataType.STRING, ((Enum<?>) value).name());
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+            current = current.getSuperclass();
+        }
+    }
+
+
+    protected void loadSerializableFields(ItemStack item, Object instance) {
+        if (!item.hasItemMeta()) return;
+
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        Class<?> current = instance.getClass();
+
+
+        while (current != null) {
+            for (Field field : current.getDeclaredFields()) {
+                if (!field.isAnnotationPresent(SerializableField.class)) continue;
+
+                field.setAccessible(true);
+                SerializableField annotation = field.getAnnotation(SerializableField.class);
+                String key = annotation.key().isEmpty() ? field.getName() : annotation.key();
+                NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
+
+                try {
+                    Class<?> type = field.getType();
+                    if (type == Integer.class || type == int.class) {
+                        if (container.has(namespacedKey, PersistentDataType.INTEGER)) {
+                            field.set(instance, container.get(namespacedKey, PersistentDataType.INTEGER));
+                        }
+                    } else if (type == String.class) {
+                        if (container.has(namespacedKey, PersistentDataType.STRING)) {
+                            field.set(instance, container.get(namespacedKey, PersistentDataType.STRING));
+                        }
+                    } else if (type == Double.class || type == double.class) {
+                        if (container.has(namespacedKey, PersistentDataType.DOUBLE)) {
+                            field.set(instance, container.get(namespacedKey, PersistentDataType.DOUBLE));
+                        }
+                    } else if (type.isEnum()) {
+                        if (container.has(namespacedKey, PersistentDataType.STRING)) {
+                            String enumName = container.get(namespacedKey, PersistentDataType.STRING);
+                            Object enumValue = Enum.valueOf((Class<Enum>) type, enumName);
+                            field.set(instance, enumValue);
+                        }
+                    }
+                } catch (IllegalAccessException | IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
+            }
+            current = current.getSuperclass();
+        }
+    }
+
 
 
     /*

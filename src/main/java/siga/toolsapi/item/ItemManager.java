@@ -3,6 +3,7 @@ package siga.toolsapi.item;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -14,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.util.ColorTranslator;
 import siga.toolsapi.util.CustomTag;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -24,9 +26,48 @@ public class ItemManager {
 
 
     public void registerItem(ItemBase item, JavaPlugin plugin) {
-        plugin.getServer().getPluginManager().registerEvents(item, plugin);
+        Class<?> current = item.getClass();
+        boolean alreadyRegistered = false;
+
+        while (current != null && ItemBase.class.isAssignableFrom(current)) {
+            if (isListenerRegistered(current)) {
+                alreadyRegistered = true;
+                break;
+            }
+            current = current.getSuperclass();
+        }
+
+        if (!alreadyRegistered) {
+            Bukkit.getPluginManager().registerEvents(item, plugin);
+            markListenerRegistered(item.getClass());
+        }
+
         itemRegistry.add(item);
     }
+
+    private boolean isListenerRegistered(Class<?> clazz) {
+        try {
+            Field f = ItemBase.class.getDeclaredField("registeredListeners");
+            f.setAccessible(true);
+            Set<Class<?>> registered = (Set<Class<?>>) f.get(null);
+            return registered.contains(clazz);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void markListenerRegistered(Class<?> clazz) {
+        try {
+            Field f = ItemBase.class.getDeclaredField("registeredListeners");
+            f.setAccessible(true);
+            Set<Class<?>> registered = (Set<Class<?>>) f.get(null);
+            registered.add(clazz);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void unregisterItem(ItemBase item) {
         HandlerList.unregisterAll(item);
