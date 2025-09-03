@@ -97,6 +97,8 @@ public abstract class ItemBase implements Listener {
     }
 
     public String getItemUUID(ItemStack item) {
+        if (item.getItemMeta() == null) return null;
+
         return handler.getPersistentData(item.getItemMeta(), CustomTag.ITEM_UUID);
     }
 

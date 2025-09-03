@@ -101,6 +101,23 @@ public abstract class GUI implements Listener {
         }
     }
 
+
+    public void removeButton(GuiButton guiButton, Player player) {
+        int amount = guiButton.getItem().getAmount();
+
+        if (amount == 1) {
+            buttons.remove(guiButton);
+            gui.remove(guiButton.getItem());
+        }
+        else {
+            guiButton.getItem().setAmount(guiButton.getItem().getAmount() -1);
+        }
+
+
+
+        refresh(player);
+    }
+
     public void refresh(Player player) {
         for (int i = 0; i < gui.getSize(); i++) {
             ItemStack item = gui.getItem(i);

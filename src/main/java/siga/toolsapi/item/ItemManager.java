@@ -70,7 +70,6 @@ public class ItemManager {
 
 
     public void unregisterItem(ItemBase item) {
-        HandlerList.unregisterAll(item);
         itemRegistry.remove(item);
     }
 
