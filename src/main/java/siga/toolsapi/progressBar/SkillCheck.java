@@ -58,6 +58,11 @@ public class SkillCheck implements Listener {
         instance.checkSuccess();
     }
 
+
+    public static boolean hasSkillCheck(Player player) {
+        return activeChecks.containsKey(player.getUniqueId());
+    }
+
     private static class SkillCheckInstance extends BukkitRunnable {
 
         private final Player player;
