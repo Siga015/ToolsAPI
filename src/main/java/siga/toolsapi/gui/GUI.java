@@ -16,13 +16,17 @@ import siga.toolsapi.util.ColorTranslator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public abstract class GUI implements Listener {
 
     private final JavaPlugin plugin;
-    private final GUIShape shape;
+    private GUIShape shape;
     private Inventory gui;
     private final List<GuiButton> buttons = new ArrayList<>();
+    private String name;
+
+    private UUID uuid;
 
     private static boolean registered = false;
 
@@ -30,6 +34,8 @@ public abstract class GUI implements Listener {
         this.plugin = plugin;
         this.shape = setShape();
         this.gui = Bukkit.createInventory(null, shape.getRowsLength() * 9, ColorTranslator.translate(setName()));
+        this.uuid = UUID.randomUUID();
+        this.name = ColorTranslator.translate(setName());
 
         applyShape(setShape());
         register();
@@ -46,6 +52,7 @@ public abstract class GUI implements Listener {
 
     protected abstract String setName();
     protected abstract GUIShape setShape();
+    protected abstract GuiFilter setGuiFilter();
 
 
     public void setItem(int index, ItemStack itemStack) {
@@ -78,7 +85,8 @@ public abstract class GUI implements Listener {
     }
 
     public void applyShape(GUIShape shape) {
-        this.gui = Bukkit.createInventory(null, shape.getRowsLength() * 9, ColorTranslator.translate(setName()));
+        this.shape = shape;
+        this.gui = Bukkit.createInventory(null, shape.getRowsLength() * 9, ColorTranslator.translate(name));
         this.buttons.clear();
 
         int slot = 0;
@@ -101,6 +109,10 @@ public abstract class GUI implements Listener {
         }
     }
 
+    public void applyNewName(String name) {
+        this.name = ColorTranslator.translate(name);
+        applyShape(this.shape);
+    }
 
     public void removeButton(GuiButton guiButton, Player player) {
         int amount = guiButton.getItem().getAmount();
@@ -134,6 +146,9 @@ public abstract class GUI implements Listener {
     }
 
 
+    public Inventory getInventory() {
+        return gui;
+    }
 
     private boolean handleButton(ItemStack item, Player player) {
         GuiButton button = getButtonByItem(item);
@@ -186,6 +201,9 @@ public abstract class GUI implements Listener {
     }
 
 
+
+
+
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
@@ -197,6 +215,13 @@ public abstract class GUI implements Listener {
 
         if (data != null && data.getCurrentGUI() != null && item != null) {
             GUI gui = data.getCurrentGUI();
+            if (gui.setGuiFilter() != null) {
+                if (!gui.setGuiFilter().filter(item)) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
             if (event.isShiftClick()) {
                 if (gui.handleShiftButton(item, player)) {
                     event.setCancelled(true);
@@ -241,4 +266,7 @@ public abstract class GUI implements Listener {
     }
 
 
+    public UUID getUuid() {
+        return uuid;
+    }
 }

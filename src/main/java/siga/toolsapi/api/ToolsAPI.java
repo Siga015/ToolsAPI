@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.gui.GUI;
 import siga.toolsapi.gui.GUIManager;
 import siga.toolsapi.gui.GUIShape;
+import siga.toolsapi.gui.GuiFilter;
 import siga.toolsapi.item.ItemAction;
 import siga.toolsapi.item.ItemBase;
 import siga.toolsapi.item.ItemManager;
@@ -50,6 +51,11 @@ public class ToolsAPI {
             @Override
             protected GUIShape setShape() {
                 return shape;
+            }
+
+            @Override
+            protected GuiFilter setGuiFilter() {
+                return null;
             }
         };
 
