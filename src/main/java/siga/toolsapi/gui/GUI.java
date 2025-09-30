@@ -25,6 +25,7 @@ public abstract class GUI implements Listener {
     private Inventory gui;
     private final List<GuiButton> buttons = new ArrayList<>();
     private String name;
+    private GuiFilter filter;
 
     private UUID uuid;
 
@@ -36,6 +37,7 @@ public abstract class GUI implements Listener {
         this.gui = Bukkit.createInventory(null, shape.getRowsLength() * 9, ColorTranslator.translate(setName()));
         this.uuid = UUID.randomUUID();
         this.name = ColorTranslator.translate(setName());
+        this.filter = setGuiFilter();
 
         applyShape(setShape());
         register();
@@ -114,6 +116,10 @@ public abstract class GUI implements Listener {
         applyShape(this.shape);
     }
 
+    public void applyFilter(GuiFilter filter) {
+        this.filter = filter;
+    }
+
     public void removeButton(GuiButton guiButton, Player player) {
         int amount = guiButton.getItem().getAmount();
 
@@ -148,6 +154,10 @@ public abstract class GUI implements Listener {
 
     public Inventory getInventory() {
         return gui;
+    }
+
+    public GuiFilter getFilter() {
+        return filter;
     }
 
     private boolean handleButton(ItemStack item, Player player) {
@@ -215,8 +225,8 @@ public abstract class GUI implements Listener {
 
         if (data != null && data.getCurrentGUI() != null && item != null) {
             GUI gui = data.getCurrentGUI();
-            if (gui.setGuiFilter() != null) {
-                if (!gui.setGuiFilter().filter(item)) {
+            if (gui.getFilter() != null) {
+                if (!gui.getFilter().filter(item)) {
                     event.setCancelled(true);
                     return;
                 }
