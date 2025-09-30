@@ -18,8 +18,8 @@ public class GuiButton {
     private final ItemStack item;
     private final String title;
     private ClickAction action;
-    private ClickAction left_shiftAction;
     private ClickAction right_shiftAction;
+    private ClickAction left_shiftAction;
     private boolean closeInventory;
     private LoreProvider loreProvider;
 
@@ -96,13 +96,17 @@ public class GuiButton {
         return action;
     }
 
-    public ClickAction getRightShiftAction() {
-        return right_shiftAction;
+    public ClickAction getShiftAction(ShiftClick click) {
+        switch (click) {
+            case RIGHT:
+                return right_shiftAction;
+            case LEFT:
+                return left_shiftAction;
+        }
+
+        return null;
     }
 
-    public ClickAction getLeftShiftAction() {
-        return left_shiftAction;
-    }
 
     public boolean getCloseInventory() {
         return closeInventory;
@@ -117,15 +121,6 @@ public class GuiButton {
         return this;
     }
 
-    public GuiButton onRightShiftClick(ClickAction shiftAction) {
-        this.right_shiftAction = shiftAction;
-        return this;
-    }
-
-    public GuiButton onLeftShiftClick(ClickAction shiftAction) {
-        this.left_shiftAction = shiftAction;
-        return this;
-    }
 
     public GuiButton withLore(String... lore) {
         setLore(lore);
@@ -145,13 +140,20 @@ public class GuiButton {
         this.action = action;
     }
 
-    public void setLeftShiftAction(ClickAction left_shiftAction) {
-        this.left_shiftAction = left_shiftAction;
+    public void setShiftAction(ClickAction action, ShiftClick click) {
+        if (click == ShiftClick.RIGHT) {
+            this.right_shiftAction = action;
+        }
+        else {
+            this.left_shiftAction = action;
+        }
     }
 
-    public void setRightShiftAction(ClickAction right_shiftAction) {
-        this.right_shiftAction = right_shiftAction;
+    public void setShiftAction(ClickAction action) {
+        this.right_shiftAction = action;
+        this.left_shiftAction = action;
     }
+
 
     public void updateLore(Player player) {
         if (loreProvider == null) return;

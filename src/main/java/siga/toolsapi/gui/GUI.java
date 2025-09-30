@@ -172,11 +172,12 @@ public abstract class GUI implements Listener {
     }
 
 
-    private boolean handleRightShiftButton(ItemStack item, Player player) {
+    private boolean handleShiftButton(ItemStack item, Player player, ShiftClick click) {
         GuiButton button = getButtonByItem(item);
         if (button != null) {
-            if (button.getRightShiftAction() != null) {
-                button.getRightShiftAction().execute(player);
+
+            if (button.getShiftAction(click) != null) {
+                button.getShiftAction(click).execute(player);
             }
             return true;
         }
@@ -184,16 +185,6 @@ public abstract class GUI implements Listener {
     }
 
 
-    private boolean handleLeftShiftButton(ItemStack item, Player player) {
-        GuiButton button = getButtonByItem(item);
-        if (button != null) {
-            if (button.getLeftShiftAction() != null) {
-                button.getLeftShiftAction().execute(player);
-            }
-            return true;
-        }
-        return false;
-    }
 
     private GuiButton getButtonByItem(ItemStack item) {
         return buttons.stream()
@@ -247,13 +238,13 @@ public abstract class GUI implements Listener {
             if (event.isShiftClick()) {
 
                 if (event.isRightClick()) {
-                    if (gui.handleRightShiftButton(item, player)) {
+                    if (gui.handleShiftButton(item, player, ShiftClick.RIGHT)) {
                         event.setCancelled(true);
                         player.updateInventory();
                     }
                 }
                 else if (event.isLeftClick()){
-                    if (gui.handleLeftShiftButton(item, player)) {
+                    if (gui.handleShiftButton(item, player, ShiftClick.LEFT)) {
                         event.setCancelled(true);
                         player.updateInventory();
                     }
