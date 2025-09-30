@@ -50,6 +50,7 @@ public abstract class GUI implements Listener {
 
         player.openInventory(gui);
         PlayerData.getPlayer(player).setCurrentGUI(this);
+        refresh(player);
     }
 
     protected abstract String setName();
@@ -142,7 +143,7 @@ public abstract class GUI implements Listener {
             if (item == null || item.getType() == Material.AIR) continue;
 
             for (GuiButton button : buttons) {
-                if (areItemsSimilar(button.getItem(), item)) {
+                if (button.getItem().isSimilar(item)) {
                     button.updateLore(player);
                     gui.setItem(i, button.getItem());
                     break;
@@ -188,7 +189,7 @@ public abstract class GUI implements Listener {
 
     private GuiButton getButtonByItem(ItemStack item) {
         return buttons.stream()
-                .filter(button -> areItemsSimilar(button.getItem(), item))
+                .filter(button -> button.getItem().isSimilar(item))
                 .findAny()
                 .orElse(null);
     }
