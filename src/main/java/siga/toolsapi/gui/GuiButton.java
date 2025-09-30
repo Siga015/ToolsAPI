@@ -18,7 +18,8 @@ public class GuiButton {
     private final ItemStack item;
     private final String title;
     private ClickAction action;
-    private ClickAction shiftAction;
+    private ClickAction left_shiftAction;
+    private ClickAction right_shiftAction;
     private boolean closeInventory;
     private LoreProvider loreProvider;
 
@@ -95,8 +96,12 @@ public class GuiButton {
         return action;
     }
 
-    public ClickAction getShiftAction() {
-        return shiftAction;
+    public ClickAction getRightShiftAction() {
+        return right_shiftAction;
+    }
+
+    public ClickAction getLeftShiftAction() {
+        return left_shiftAction;
     }
 
     public boolean getCloseInventory() {
@@ -112,8 +117,13 @@ public class GuiButton {
         return this;
     }
 
-    public GuiButton onShiftClick(ClickAction shiftAction) {
-        this.shiftAction = shiftAction;
+    public GuiButton onRightShiftClick(ClickAction shiftAction) {
+        this.right_shiftAction = shiftAction;
+        return this;
+    }
+
+    public GuiButton onLeftShiftClick(ClickAction shiftAction) {
+        this.left_shiftAction = shiftAction;
         return this;
     }
 
@@ -135,10 +145,13 @@ public class GuiButton {
         this.action = action;
     }
 
-    public void setShiftAction(ClickAction shiftAction) {
-        this.shiftAction = shiftAction;
+    public void setLeftShiftAction(ClickAction left_shiftAction) {
+        this.left_shiftAction = left_shiftAction;
     }
 
+    public void setRightShiftAction(ClickAction right_shiftAction) {
+        this.right_shiftAction = right_shiftAction;
+    }
 
     public void updateLore(Player player) {
         if (loreProvider == null) return;
