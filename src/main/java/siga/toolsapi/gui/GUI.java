@@ -227,12 +227,6 @@ public abstract class GUI implements Listener {
 
         if (data != null && data.getCurrentGUI() != null && item != null) {
             GUI gui = data.getCurrentGUI();
-            if (gui.getFilter() != null) {
-                if (!gui.getFilter().filter(item)) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
 
             if (event.isShiftClick()) {
 
@@ -250,6 +244,14 @@ public abstract class GUI implements Listener {
                 }
             }
             else if (gui.handleButton(item, player)) event.setCancelled(true);
+
+            if (gui.getFilter() != null) {
+                if (!gui.getFilter().filter(item)) {
+                    event.setCancelled(true);
+                }
+            }
+
+
         }
     }
 
