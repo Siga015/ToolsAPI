@@ -47,10 +47,8 @@ public abstract class GUI implements Listener {
 
     public void show(Player player) {
         refresh(player);
-
         player.openInventory(gui);
         PlayerData.getPlayer(player).setCurrentGUI(this);
-        refresh(player);
     }
 
     protected abstract String setName();
