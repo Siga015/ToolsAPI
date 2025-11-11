@@ -26,15 +26,7 @@ public class SkillCheck implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    /**
-     * Startuje nowy skill check dla gracza
-     *
-     * @param player gracz
-     * @param bars   ile ma być "kresek" w pasku (np. 20)
-     * @param speed  ticki pomiędzy przesunięciami (im mniejsza wartość tym szybciej się przesuwa) np. 2
-     * @param successAction akcja do wykonania przy udanym kliknięciu
-     * @param failAction    akcja przy nieudanym (lub braku kliknięcia)
-     */
+
     public void startSkillCheck(Player player, int bars, int speed, Runnable successAction, Runnable failAction) {
         if (activeChecks.containsKey(player.getUniqueId())) return;
 
