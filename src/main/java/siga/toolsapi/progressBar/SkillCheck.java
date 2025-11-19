@@ -27,12 +27,12 @@ public class SkillCheck implements Listener {
     }
 
 
-    public void startSkillCheck(Player player, int bars, int speed, Runnable successAction, Runnable failAction) {
+    public void startSkillCheck(Player player, int bars, int speed, int minGreenBars, Runnable successAction, Runnable failAction) {
         if (activeChecks.containsKey(player.getUniqueId())) return;
 
         int markerPos = 0;
         int greenStart = new Random().nextInt(bars - 4);
-        int greenLength = 3 + new Random().nextInt(1);
+        int greenLength = minGreenBars + new Random().nextInt(1);
 
         SkillCheckInstance instance = new SkillCheckInstance(player, bars, markerPos, greenStart, greenLength, speed, successAction, failAction);
         activeChecks.put(player.getUniqueId(), instance);
@@ -53,6 +53,13 @@ public class SkillCheck implements Listener {
 
     public static boolean hasSkillCheck(Player player) {
         return activeChecks.containsKey(player.getUniqueId());
+    }
+
+    public static void cancelSkillCheck(Player player) {
+        if (!hasSkillCheck(player)) return;
+
+        SkillCheckInstance skill = activeChecks.get(player.getUniqueId());
+        skill.end(false);
     }
 
     private static class SkillCheckInstance extends BukkitRunnable {
