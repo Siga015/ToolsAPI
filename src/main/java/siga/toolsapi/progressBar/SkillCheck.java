@@ -1,5 +1,9 @@
 package siga.toolsapi.progressBar;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -11,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -117,6 +122,23 @@ public class SkillCheck implements Listener {
             }
             sb.append(ChatColor.GRAY).append("]");
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(sb.toString()));
+
+            player.showTitle(
+                    Title.title(
+                            Component.empty(),
+                            Component.text()
+                                    .append(Component.keybind("key.sneak")
+                                            .color(NamedTextColor.GOLD)
+                                            .decorate(TextDecoration.BOLD))
+                                    .build(),
+                            Title.Times.times(
+                                    Duration.ofMillis(0),
+                                    Duration.ofSeconds(1),
+                                    Duration.ofMillis(0)
+                            )
+                    )
+            );
+
             player.sendTitle("", "§l§6SHIFT", 0, 20, 0);
         }
 
