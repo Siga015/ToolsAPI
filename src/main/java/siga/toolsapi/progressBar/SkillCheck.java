@@ -139,7 +139,6 @@ public class SkillCheck implements Listener {
                     )
             );
 
-            player.sendTitle("", "§l§6SHIFT", 0, 20, 0);
         }
 
         public void checkSuccess() {
