@@ -251,7 +251,7 @@ public abstract class GUI implements Listener {
                 }
             }
 
-
+            Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory,1);
         }
     }
 
