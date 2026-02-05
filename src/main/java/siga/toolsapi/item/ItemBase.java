@@ -1,6 +1,7 @@
 package siga.toolsapi.item;
 
 import org.bukkit.*;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -121,11 +122,14 @@ public abstract class ItemBase implements Listener {
     @EventHandler
     public void onClick(PlayerInteractEvent event) {
         if (onClick() == null) return;
+        Player player = event.getPlayer();
 
         ItemStack item = event.getItem();
 
         if (item != null && isCustomItem(item)) {
             ClickType clickType = null;
+
+            if (player.hasCooldown(item)) return;
 
             if (event.getAction().toString().contains("RIGHT")) {
                 clickType = ClickType.RIGHT;
@@ -135,7 +139,7 @@ public abstract class ItemBase implements Listener {
 
             if (clickType == null) return;
             ItemAction action = onClick();
-            action.execute(event.getPlayer(), clickType, item);
+            action.execute(player, clickType, item);
         }
     }
 
