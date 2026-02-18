@@ -4,6 +4,8 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -12,6 +14,7 @@ import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import siga.toolsapi.event.ItemUseEvent;
 import siga.toolsapi.item.version.MetaHandler;
 import siga.toolsapi.item.version.MetaHandler_1_12;
 import siga.toolsapi.item.version.MetaHandler_1_13;
@@ -122,26 +125,55 @@ public abstract class ItemBase implements Listener {
     @EventHandler
     public void onClick(PlayerInteractEvent event) {
         if (onClick() == null) return;
-        Player player = event.getPlayer();
 
+        Player player = event.getPlayer();
         ItemStack item = event.getItem();
 
-        if (item != null && isCustomItem(item)) {
-            ClickType clickType = null;
+        if (item == null || !isCustomItem(item)) return;
+        if (event.getAction() == Action.PHYSICAL) return;
 
-            if (player.hasCooldown(item)) return;
-
-            if (event.getAction().toString().contains("RIGHT")) {
-                clickType = ClickType.RIGHT;
-            } else if (event.getAction().toString().contains("LEFT")) {
-                clickType = ClickType.LEFT;
+        if (event.getClickedBlock() != null) {
+            if (event.getClickedBlock().getType().isInteractable()) {
+                return;
             }
+        }
 
-            if (clickType == null) return;
-            ItemAction action = onClick();
-            action.execute(player, clickType, item);
+        if (player.hasCooldown(item)) return;
+
+        ClickType clickType = null;
+
+        if (event.getAction() == Action.RIGHT_CLICK_AIR ||
+                event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            clickType = ClickType.RIGHT;
+        } else if (event.getAction() == Action.LEFT_CLICK_AIR ||
+                event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            clickType = ClickType.LEFT;
+        }
+
+        if (clickType == null) return;
+
+        ItemAction action = onClick();
+
+        ItemUseEvent useEvent = new ItemUseEvent(player, item, clickType);
+        Bukkit.getPluginManager().callEvent(useEvent);
+
+        if (useEvent.isCancelled()) {
+            return;
+        }
+
+        action.execute(player, clickType, item);
+    }
+
+
+    @EventHandler
+    public void onInteractEntity(PlayerInteractEntityEvent event) {
+        ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
+
+        if (isCustomItem(item)) {
+            event.setCancelled(false);
         }
     }
+
 
     protected void saveSerializableFields(ItemMeta meta, Object instance) {
         PersistentDataContainer container = meta.getPersistentDataContainer();
