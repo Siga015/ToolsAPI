@@ -1,10 +1,14 @@
 package siga.toolsapi.item;
 
 import org.bukkit.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
@@ -16,10 +20,11 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import siga.toolsapi.event.ItemUseEvent;
 import siga.toolsapi.item.version.MetaHandler;
-import siga.toolsapi.item.version.MetaHandler_1_12;
 import siga.toolsapi.item.version.MetaHandler_1_13;
 import siga.toolsapi.util.CustomTag;
+import siga.toolsapi.util.Timing;
 
+import javax.naming.Name;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -47,7 +52,7 @@ public abstract class ItemBase implements Listener {
         this.category = setCategory();
 
 
-        this.handler = isModernVersion() ? new MetaHandler_1_13(plugin) : new MetaHandler_1_12();
+        this.handler = new MetaHandler_1_13(plugin);
     }
 
 
@@ -121,8 +126,7 @@ public abstract class ItemBase implements Listener {
     }
 
 
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onClick(PlayerInteractEvent event) {
         if (onClick() == null) return;
 
@@ -131,6 +135,7 @@ public abstract class ItemBase implements Listener {
 
         if (item == null || !isCustomItem(item)) return;
         if (event.getAction() == Action.PHYSICAL) return;
+        if (item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey("plugin", "blocked_item"))) return;
 
         if (event.getClickedBlock() != null) {
             if (event.getClickedBlock().getType().isInteractable()) {
@@ -165,7 +170,7 @@ public abstract class ItemBase implements Listener {
     }
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onInteractEntity(PlayerInteractEntityEvent event) {
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
 

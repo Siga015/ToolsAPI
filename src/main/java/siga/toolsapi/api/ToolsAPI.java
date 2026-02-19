@@ -14,7 +14,6 @@ import siga.toolsapi.item.ItemModifier;
 import siga.toolsapi.util.ColorTranslator;
 
 import java.util.List;
-import java.util.Map;
 
 public class ToolsAPI {
 
