@@ -228,6 +228,14 @@ public abstract class GUI implements Listener {
         if (data != null && data.getCurrentGUI() != null && item != null) {
             GUI gui = data.getCurrentGUI();
 
+            // Read only GUIs
+            if (gui instanceof ReadOnly) {
+                if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
             if (event.isShiftClick()) {
 
                 if (event.isRightClick()) {

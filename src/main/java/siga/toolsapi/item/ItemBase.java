@@ -74,12 +74,12 @@ public abstract class ItemBase implements Listener {
         assert meta != null;
         meta.setDisplayName(ColorTranslator.translate(setName()));
         if (isModernVersion() && setCustomModel() != null) {
-            CustomModelDataComponent modelDataComp = meta.getCustomModelDataComponent();
-            List<String> strings = new ArrayList<>();
-            strings.add(setCustomModel());
-            modelDataComp.setStrings(strings);
+                CustomModelDataComponent modelDataComp = meta.getCustomModelDataComponent();
+                List<String> strings = new ArrayList<>();
+                strings.add(setCustomModel());
+                modelDataComp.setStrings(strings);
 
-            meta.setCustomModelDataComponent(modelDataComp);
+                meta.setCustomModelDataComponent(modelDataComp);
         }
         meta.setLore(lore);
 
