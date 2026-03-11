@@ -230,6 +230,11 @@ public abstract class GUI implements Listener {
 
             // Read only GUIs
             if (gui instanceof ReadOnly) {
+                if (event.getClick().isKeyboardClick()) {
+                    event.setCancelled(true);
+                    return;
+                }
+
                 if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) {
                     event.setCancelled(true);
                     return;
