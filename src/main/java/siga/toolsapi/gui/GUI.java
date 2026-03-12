@@ -5,8 +5,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -225,11 +227,16 @@ public abstract class GUI implements Listener {
         ItemStack item = event.getCurrentItem();
         PlayerData data = PlayerData.getPlayer(player);
 
-        if (data != null && data.getCurrentGUI() != null && item != null) {
+        if (data != null && data.getCurrentGUI() != null) {
             GUI gui = data.getCurrentGUI();
 
             // Read only GUIs
             if (gui instanceof ReadOnly) {
+                if (event.getClick() == ClickType.NUMBER_KEY) {
+                    event.setCancelled(true);
+                    return;
+                }
+
                 if (event.getClick().isKeyboardClick()) {
                     event.setCancelled(true);
                     return;
@@ -240,6 +247,8 @@ public abstract class GUI implements Listener {
                     return;
                 }
             }
+
+            if (item == null) return;
 
             if (event.isShiftClick()) {
 
@@ -265,6 +274,27 @@ public abstract class GUI implements Listener {
             }
 
             Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory,1);
+        }
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+
+        Player player = (Player) event.getWhoClicked();
+
+        PlayerData data = PlayerData.getPlayer(player);
+        if (data == null || data.getCurrentGUI() == null) return;
+
+        GUI gui = data.getCurrentGUI();
+
+        if (gui instanceof ReadOnly) {
+            for (int slot : event.getRawSlots()) {
+//                if (slot < gui.getInventory().getSize()) {
+                    event.setCancelled(true);
+                    return;
+//                }
+            }
         }
     }
 
