@@ -248,6 +248,13 @@ public abstract class GUI implements Listener {
                 }
             }
 
+            if (gui.getFilter() != null) {
+                if (!gui.getFilter().filter(item)) {
+                    event.setCancelled(true);
+                }
+            }
+
+
             if (item == null) return;
 
             if (event.isShiftClick()) {
@@ -266,12 +273,6 @@ public abstract class GUI implements Listener {
                 }
             }
             else if (gui.handleButton(item, player)) event.setCancelled(true);
-
-            if (gui.getFilter() != null) {
-                if (!gui.getFilter().filter(item)) {
-                    event.setCancelled(true);
-                }
-            }
 
             Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory,1);
         }
