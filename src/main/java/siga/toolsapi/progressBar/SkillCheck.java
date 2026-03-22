@@ -1,9 +1,5 @@
 package siga.toolsapi.progressBar;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -15,7 +11,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -36,7 +31,8 @@ public class SkillCheck implements Listener {
         if (activeChecks.containsKey(player.getUniqueId())) return;
 
         int markerPos = 0;
-        int greenStart = new Random().nextInt(bars - 4);
+        int safeOffset = Math.max(3, bars / 6);
+        int greenStart = safeOffset + new Random().nextInt(bars - safeOffset - 4);
         int greenLength = minGreenBars + new Random().nextInt(1);
 
         SkillCheckInstance instance = new SkillCheckInstance(player, bars, markerPos, greenStart, greenLength, speed, successAction, failAction);
@@ -110,35 +106,26 @@ public class SkillCheck implements Listener {
         }
 
         private void sendBar() {
-            StringBuilder sb = new StringBuilder(ChatColor.GRAY + "[");
+
+            StringBuilder bar = new StringBuilder();
+
             for (int i = 0; i < bars; i++) {
+
                 if (i == markerPos) {
-                    sb.append(ChatColor.WHITE).append("|");
-                } else if (i >= greenStart && i < greenEnd) {
-                    sb.append(ChatColor.GREEN).append("-");
-                } else {
-                    sb.append(ChatColor.DARK_GRAY).append("-");
+                    bar.append(ChatColor.WHITE).append("▼");
+                }
+                else if (i >= greenStart && i < greenEnd) {
+                    bar.append(ChatColor.GREEN).append("▌");
+                }
+                else {
+                    bar.append(ChatColor.DARK_GRAY).append("▌");
                 }
             }
-            sb.append(ChatColor.GRAY).append("]");
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(sb.toString()));
 
-            player.showTitle(
-                    Title.title(
-                            Component.empty(),
-                            Component.text()
-                                    .append(Component.keybind("key.sneak")
-                                            .color(NamedTextColor.GOLD)
-                                            .decorate(TextDecoration.BOLD))
-                                    .build(),
-                            Title.Times.times(
-                                    Duration.ofMillis(0),
-                                    Duration.ofSeconds(1),
-                                    Duration.ofMillis(0)
-                            )
-                    )
+            player.spigot().sendMessage(
+                    ChatMessageType.ACTION_BAR,
+                    new TextComponent(bar.toString())
             );
-
         }
 
         public void checkSuccess() {

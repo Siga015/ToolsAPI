@@ -248,14 +248,23 @@ public abstract class GUI implements Listener {
                 }
             }
 
+            ItemStack movedItem = getMovedItem(event);
+
             if (gui.getFilter() != null) {
-                if (!gui.getFilter().filter(item)) {
-                    event.setCancelled(true);
+
+                if (event.getRawSlot() < gui.getInventory().getSize()) {
+
+                    if (movedItem == null || movedItem.getType() == Material.AIR) {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if (!gui.getFilter().filter(movedItem)) {
+                        event.setCancelled(true);
+                        return;
+                    }
                 }
             }
-
-
-            if (item == null) return;
 
             if (event.isShiftClick()) {
 
@@ -297,6 +306,20 @@ public abstract class GUI implements Listener {
 //                }
             }
         }
+    }
+
+    private ItemStack getMovedItem(InventoryClickEvent event) {
+
+        if (event.getClick() == ClickType.NUMBER_KEY) {
+            int hotbar = event.getHotbarButton();
+            return event.getWhoClicked().getInventory().getItem(hotbar);
+        }
+
+        if (event.getCursor() != null && event.getCursor().getType() != Material.AIR) {
+            return event.getCursor();
+        }
+
+        return event.getCurrentItem();
     }
 
     private boolean areItemsSimilar(ItemStack item1, ItemStack item2) {
