@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public abstract class GUI implements Listener {
+public abstract class GUI {
 
     private final JavaPlugin plugin;
     private GUIShape shape;
@@ -31,8 +32,6 @@ public abstract class GUI implements Listener {
 
     private UUID uuid;
 
-    private static boolean registered = false;
-
     public GUI(JavaPlugin plugin) {
         this.plugin = plugin;
         this.shape = setShape();
@@ -42,8 +41,6 @@ public abstract class GUI implements Listener {
         this.filter = setGuiFilter();
 
         applyShape(setShape());
-        register();
-
     }
 
 
@@ -53,24 +50,25 @@ public abstract class GUI implements Listener {
         PlayerData.getPlayer(player).setCurrentGUI(this);
     }
 
+
     protected abstract String setName();
     protected abstract GUIShape setShape();
     protected abstract GuiFilter setGuiFilter();
 
 
     public void setItem(int index, ItemStack itemStack) {
-        gui.setItem(index, itemStack);
+        gui.setItem(index, itemStack.clone());
     }
 
     public void setButton(int index, GuiButton button) {
         buttons.add(button);
-        gui.setItem(index, button.getItem());
+        gui.setItem(index, button.getItem().clone());
     }
 
     public void addItem(ItemStack item) {
         for (int i = 0; i < this.gui.getSize(); i++) {
             if (this.gui.getItem(i) == null || Objects.requireNonNull(this.gui.getItem(i)).getType() == Material.AIR) {;
-                this.gui.setItem(i, item);
+                this.gui.setItem(i, item.clone());
                 return;
             }
         }
@@ -81,7 +79,7 @@ public abstract class GUI implements Listener {
         for (int i = 0; i < this.gui.getSize(); i++) {
             if (this.gui.getItem(i) == null || Objects.requireNonNull(this.gui.getItem(i)).getType() == Material.AIR) {
                 this.buttons.add(button);
-                this.gui.setItem(i, button.getItem());
+                this.gui.setItem(i, button.getItem().clone());
                 return;
             }
         }
@@ -99,13 +97,13 @@ public abstract class GUI implements Listener {
 
                 if (shape.getItems().get(c) != null) {
                     ItemStack item = shape.getItems().get(c);
-                    gui.setItem(i, item);
+                    gui.setItem(i, item.clone());
                 }
 
                 if (shape.getButtons().get(c) != null) {
                     GuiButton button = shape.getButtons().get(c);
                     buttons.add(button);
-                    gui.setItem(i, button.getItem());
+                    gui.setItem(i, button.getItem().clone());
                 }
             }
             slot += 9;
@@ -145,7 +143,7 @@ public abstract class GUI implements Listener {
             for (GuiButton button : buttons) {
                 if (button.getItem().isSimilar(item)) {
                     button.updateLore(player);
-                    gui.setItem(i, button.getItem());
+                    gui.setItem(i, button.getItem().clone());
                     break;
                 }
             }
@@ -195,118 +193,183 @@ public abstract class GUI implements Listener {
     }
 
 
-
-
-    private void register() {
-        if (!registered) {
-            registered = true;
-            plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        }
-    }
-
-
-    @EventHandler
-    public void onClose(InventoryCloseEvent event) {
-        Player player = (Player) event.getPlayer();
-
-        if (PlayerData.getPlayer(player).getCurrentGUI() != null) {
-            PlayerData.getPlayer(player).setCurrentGUI(null);
-        }
-    }
-
-
-
-
-
-    @EventHandler
-    public void onClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
-
-
+    public void handleClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
-        PlayerData data = PlayerData.getPlayer(player);
 
-        if (data != null && data.getCurrentGUI() != null) {
-            GUI gui = data.getCurrentGUI();
-
-            // Read only GUIs
-            if (gui instanceof ReadOnly) {
-                if (event.getClick() == ClickType.NUMBER_KEY) {
-                    event.setCancelled(true);
-                    return;
-                }
-
-                if (event.getClick().isKeyboardClick()) {
-                    event.setCancelled(true);
-                    return;
-                }
-
-                if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) {
-                    event.setCancelled(true);
-                    return;
-                }
+        // ReadOnly GUI
+        if (this instanceof ReadOnly) {
+            if (event.getClick() == ClickType.NUMBER_KEY) {
+                event.setCancelled(true);
+                return;
             }
 
-            ItemStack movedItem = getMovedItem(event);
-
-            if (gui.getFilter() != null) {
-
-                if (event.getRawSlot() < gui.getInventory().getSize()) {
-
-                    if (movedItem == null || movedItem.getType() == Material.AIR) {
-                        event.setCancelled(true);
-                        return;
-                    }
-
-                    if (!gui.getFilter().filter(movedItem)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
+            if (event.getClick().isKeyboardClick()) {
+                event.setCancelled(true);
+                return;
             }
 
-            if (event.isShiftClick()) {
-
-                if (event.isRightClick()) {
-                    if (gui.handleShiftButton(item, player, ShiftClick.RIGHT)) {
-                        event.setCancelled(true);
-                        player.updateInventory();
-                    }
-                }
-                else if (event.isLeftClick()){
-                    if (gui.handleShiftButton(item, player, ShiftClick.LEFT)) {
-                        event.setCancelled(true);
-                        player.updateInventory();
-                    }
-                }
+            if (event.getClickedInventory() != null &&
+                    event.getClickedInventory().equals(player.getInventory())) {
+                event.setCancelled(true);
+                return;
             }
-            else if (gui.handleButton(item, player)) event.setCancelled(true);
-
-            Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory,1);
         }
+
+        ItemStack movedItem = getMovedItem(event);
+
+
+        if (filter != null) {
+            if (event.getRawSlot() < gui.getSize()) {
+
+                if (movedItem != null && movedItem.getType() != Material.AIR) {
+
+                    if (!filter.filter(movedItem)) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+
+        if (event.isShiftClick()) {
+            if (event.isRightClick()) {
+                if (handleShiftButton(item, player, ShiftClick.RIGHT)) {
+                    event.setCancelled(true);
+                }
+            } else if (event.isLeftClick()) {
+                if (handleShiftButton(item, player, ShiftClick.LEFT)) {
+                    event.setCancelled(true);
+                }
+            }
+        } else {
+            if (handleButton(item, player)) {
+                event.setCancelled(true);
+            }
+        }
+
+        Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
     }
 
-    @EventHandler
-    public void onDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
-
+    public void handleDrag(InventoryDragEvent event) {
         Player player = (Player) event.getWhoClicked();
 
-        PlayerData data = PlayerData.getPlayer(player);
-        if (data == null || data.getCurrentGUI() == null) return;
-
-        GUI gui = data.getCurrentGUI();
-
-        if (gui instanceof ReadOnly) {
+        if (this instanceof ReadOnly) {
             for (int slot : event.getRawSlots()) {
-//                if (slot < gui.getInventory().getSize()) {
+                if (slot < gui.getSize()) {
                     event.setCancelled(true);
                     return;
-//                }
+                }
             }
         }
     }
+
+    public void handleClose(Player player) {
+        PlayerData.getPlayer(player).setCurrentGUI(null);
+    }
+
+
+//    @EventHandler
+//    public void onClose(InventoryCloseEvent event) {
+//        Player player = (Player) event.getPlayer();
+//
+//        if (PlayerData.getPlayer(player).getCurrentGUI() != null) {
+//            PlayerData.getPlayer(player).setCurrentGUI(null);
+//        }
+//    }
+
+
+
+//    @EventHandler(priority = EventPriority.LOWEST)
+//    public void onClick(InventoryClickEvent event) {
+//        if (!(event.getWhoClicked() instanceof Player)) return;
+//
+//
+//        Player player = (Player) event.getWhoClicked();
+//        ItemStack item = event.getCurrentItem();
+//        PlayerData data = PlayerData.getPlayer(player);
+//
+//        if (data != null && data.getCurrentGUI() != null) {
+//            GUI gui = data.getCurrentGUI();
+//
+//            if (!event.getView().getTopInventory().equals(gui.getInventory())) return;
+//
+//            // Read only GUIs
+//            if (gui instanceof ReadOnly) {
+//                if (event.getClick() == ClickType.NUMBER_KEY) {
+//                    event.setCancelled(true);
+//                    return;
+//                }
+//
+//                if (event.getClick().isKeyboardClick()) {
+//                    event.setCancelled(true);
+//                    return;
+//                }
+//
+//                if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) {
+//                    event.setCancelled(true);
+//                    return;
+//                }
+//            }
+//
+//            ItemStack movedItem = getMovedItem(event);
+//
+//            if (gui.getFilter() != null) {
+//
+//                if (event.getRawSlot() < gui.getInventory().getSize()) {
+//
+//                    if (movedItem == null || movedItem.getType() == Material.AIR) {
+//                        event.setCancelled(true);
+//                        return;
+//                    }
+//
+//                    if (!gui.getFilter().filter(movedItem)) {
+//                        event.setCancelled(true);
+//                        return;
+//                    }
+//                }
+//            }
+//
+//            if (event.isShiftClick()) {
+//
+//                if (event.isRightClick()) {
+//                    if (gui.handleShiftButton(item, player, ShiftClick.RIGHT)) {
+//                        event.setCancelled(true);
+//                        player.updateInventory();
+//                    }
+//                }
+//                else if (event.isLeftClick()){
+//                    if (gui.handleShiftButton(item, player, ShiftClick.LEFT)) {
+//                        event.setCancelled(true);
+//                        player.updateInventory();
+//                    }
+//                }
+//            }
+//            else if (gui.handleButton(item, player)) event.setCancelled(true);
+//
+//            Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory,1);
+//        }
+//    }
+
+//    @EventHandler
+//    public void onDrag(InventoryDragEvent event) {
+//        if (!(event.getWhoClicked() instanceof Player)) return;
+//
+//        Player player = (Player) event.getWhoClicked();
+//
+//        PlayerData data = PlayerData.getPlayer(player);
+//        if (data == null || data.getCurrentGUI() == null) return;
+//
+//        GUI gui = data.getCurrentGUI();
+//
+//        if (gui instanceof ReadOnly) {
+//            for (int slot : event.getRawSlots()) {
+////                if (slot < gui.getInventory().getSize()) {
+//                    event.setCancelled(true);
+//                    return;
+////                }
+//            }
+//        }
+//    }
 
     private ItemStack getMovedItem(InventoryClickEvent event) {
 
