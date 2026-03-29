@@ -220,16 +220,77 @@ public abstract class GUI {
 
 
         if (filter != null) {
+            if (movedItem == null) {
+                if (event.getClickedInventory() != null && event.getClickedInventory().equals(gui)) {
+                    event.setCancelled(true);
+                }
+            }
+
             if (event.getRawSlot() < gui.getSize()) {
 
                 if (movedItem != null && movedItem.getType() != Material.AIR) {
-
                     if (!filter.filter(movedItem)) {
                         event.setCancelled(true);
                     }
                 }
             }
         }
+
+
+        // SHIFT CLICK
+        if (event.isShiftClick()) {
+
+            if (item == null || item.getType().isAir()) return;
+
+            if (event.getClickedInventory() == player.getInventory()) {
+
+                if (filter != null && !filter.filter(item)) {
+                    event.setCancelled(true);
+                    return;
+                }
+
+                for (int i = 0; i < gui.getSize(); i++) {
+                    ItemStack guiItem = gui.getItem(i);
+
+                    if (guiItem == null || guiItem.getType().isAir()) {
+                        gui.setItem(i, item.clone());
+                        event.setCurrentItem(null);
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        // NUMBER CLICK
+        if (event.getClick() == ClickType.NUMBER_KEY) {
+            int hotbarSlot = event.getHotbarButton();
+            ItemStack hotbarItem = player.getInventory().getItem(hotbarSlot);
+
+            if (hotbarItem == null || hotbarItem.getType() == Material.AIR) {
+                if (filter != null && !filter.filter(hotbarItem) && event.getRawSlot() < gui.getSize()) {
+                    event.setCancelled(true);
+                }
+            }
+
+            if (hotbarItem == null || hotbarItem.getType().isAir()) return;
+
+
+            if (filter != null && !filter.filter(hotbarItem)) {
+                event.setCancelled(true);
+                return;
+            }
+
+            if (event.getRawSlot() < gui.getSize()) {
+                gui.setItem(event.getRawSlot(), hotbarItem.clone());
+                player.getInventory().setItem(hotbarSlot, null);
+                event.setCancelled(true);
+            }
+        }
+
 
         if (event.isShiftClick()) {
             if (event.isRightClick()) {
