@@ -195,124 +195,101 @@ public abstract class GUI {
 
     public void handleClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
-        ItemStack item = event.getCurrentItem();
 
-        // ReadOnly GUI
-        if (this instanceof ReadOnly) {
-            if (event.getClick() == ClickType.NUMBER_KEY) {
-                event.setCancelled(true);
-                return;
-            }
+        ItemStack current = event.getCurrentItem();
+        ItemStack cursor = event.getCursor();
 
-            if (event.getClick().isKeyboardClick()) {
-                event.setCancelled(true);
-                return;
-            }
+        boolean isTop = event.getRawSlot() < gui.getSize();
 
-            if (event.getClickedInventory() != null &&
-                    event.getClickedInventory().equals(player.getInventory())) {
-                event.setCancelled(true);
-                return;
-            }
-        }
-
-        ItemStack movedItem = getMovedItem(event);
-
-
-        if (filter != null) {
-            if (movedItem == null) {
-                if (event.getClickedInventory() != null && event.getClickedInventory().equals(gui)) {
-                    event.setCancelled(true);
-                }
-            }
-
-            if (event.getRawSlot() < gui.getSize()) {
-
-                if (movedItem != null && movedItem.getType() != Material.AIR) {
-                    if (!filter.filter(movedItem)) {
-                        event.setCancelled(true);
-                    }
-                }
-            }
-        }
-
-
-        // SHIFT CLICK
+        /* BUTTONS */
         if (event.isShiftClick()) {
-
-            if (item == null || item.getType().isAir()) return;
-
-            if (event.getClickedInventory() == player.getInventory()) {
-
-                if (filter != null && !filter.filter(item)) {
+            if (event.isRightClick()) {
+                if (handleShiftButton(current, player, ShiftClick.RIGHT)) {
                     event.setCancelled(true);
                     return;
                 }
-
-                for (int i = 0; i < gui.getSize(); i++) {
-                    ItemStack guiItem = gui.getItem(i);
-
-                    if (guiItem == null || guiItem.getType().isAir()) {
-                        gui.setItem(i, item.clone());
-                        event.setCurrentItem(null);
-                        event.setCancelled(true);
-                        return;
-                    }
+            } else if (event.isLeftClick()) {
+                if (handleShiftButton(current, player, ShiftClick.LEFT)) {
+                    event.setCancelled(true);
+                    return;
                 }
-
+            }
+        } else {
+            if (handleButton(current, player)) {
                 event.setCancelled(true);
                 return;
             }
         }
 
-        // NUMBER CLICK
+
+
+        ItemStack movedItem;
+
         if (event.getClick() == ClickType.NUMBER_KEY) {
+            movedItem = player.getInventory().getItem(event.getHotbarButton());
+        } else if (cursor != null && !cursor.getType().isAir()) {
+            movedItem = cursor;
+        } else {
+            movedItem = current;
+        }
+
+
+        if (movedItem == null || movedItem.getType().isAir()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (filter != null && isTop) {
+
+            boolean isPlacing =
+                    event.getCursor() != null && !event.getCursor().getType().isAir()
+                            || event.getClick() == ClickType.NUMBER_KEY
+                            || event.isShiftClick();
+
+            if (isPlacing) {
+
+                if (!filter.filter(movedItem)) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+
+
+        if (event.isShiftClick() && event.getClickedInventory() == player.getInventory()) {
+
+            if (current == null || current.getType().isAir()) return;
+
+            if (filter != null && !filter.filter(current)) {
+                event.setCancelled(true);
+                return;
+            }
+
+        }
+
+
+        if (event.getClick() == ClickType.NUMBER_KEY) {
+
             int hotbarSlot = event.getHotbarButton();
             ItemStack hotbarItem = player.getInventory().getItem(hotbarSlot);
 
-            if (hotbarItem == null || hotbarItem.getType() == Material.AIR) {
-                if (filter != null && !filter.filter(hotbarItem) && event.getRawSlot() < gui.getSize()) {
-                    event.setCancelled(true);
-                }
+            if (hotbarItem == null || hotbarItem.getType().isAir()) {
+                if (isTop) event.setCancelled(true);
+                return;
             }
-
-            if (hotbarItem == null || hotbarItem.getType().isAir()) return;
-
 
             if (filter != null && !filter.filter(hotbarItem)) {
                 event.setCancelled(true);
                 return;
             }
 
-            if (event.getRawSlot() < gui.getSize()) {
-                gui.setItem(event.getRawSlot(), hotbarItem.clone());
-                player.getInventory().setItem(hotbarSlot, null);
-                event.setCancelled(true);
-            }
         }
 
-
-        if (event.isShiftClick()) {
-            if (event.isRightClick()) {
-                if (handleShiftButton(item, player, ShiftClick.RIGHT)) {
-                    event.setCancelled(true);
-                }
-            } else if (event.isLeftClick()) {
-                if (handleShiftButton(item, player, ShiftClick.LEFT)) {
-                    event.setCancelled(true);
-                }
-            }
-        } else {
-            if (handleButton(item, player)) {
-                event.setCancelled(true);
-            }
-        }
 
         Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
     }
 
     public void handleDrag(InventoryDragEvent event) {
-        Player player = (Player) event.getWhoClicked();
 
         if (this instanceof ReadOnly) {
             for (int slot : event.getRawSlots()) {
