@@ -37,7 +37,6 @@ public abstract class ItemBase implements Listener {
     private final MetaHandler handler;
 
     private final List<String> lore;
-    private final String category;
 
     private static final Set<Class<?>> registeredListeners = new HashSet<>();
 
@@ -49,7 +48,6 @@ public abstract class ItemBase implements Listener {
         List<String> lore = setLore();
         if (lore != null) lore.forEach(ColorTranslator::translate);
         this.lore = lore;
-        this.category = setCategory();
 
 
         this.handler = new MetaHandler_1_13(plugin);
@@ -123,6 +121,15 @@ public abstract class ItemBase implements Listener {
     protected void finalizeMeta(ItemMeta meta) {
         customizeMeta(meta);
         saveSerializableFields(meta, this);
+    }
+
+    public ItemData getData() {
+        return new ItemData(
+                setName(),
+                setCustomModel(),
+                setCategory(),
+                setLore()
+        );
     }
 
 
@@ -286,7 +293,7 @@ public abstract class ItemBase implements Listener {
 
 
     public String getCategory() {
-        return category;
+        return setCategory();
     }
 
     private static class ColorTranslator {

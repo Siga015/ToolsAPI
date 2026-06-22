@@ -199,6 +199,10 @@ public abstract class GUI {
         ItemStack current = event.getCurrentItem();
         ItemStack cursor = event.getCursor();
 
+        if (this instanceof ReadOnly) {
+            event.setCancelled(true);
+        }
+
         boolean isTop = event.getRawSlot() < gui.getSize();
 
         /* BUTTONS */
